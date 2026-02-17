@@ -1,4 +1,4 @@
-# 02_preprocess_by_size_plus_golden_all.py
+# 02_preprocess.py
 # Outputs:
 #  - product_weekly_by_size_plus_wide.csv
 #  - product_weekly_by_size_plus_long.csv
@@ -244,3 +244,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
