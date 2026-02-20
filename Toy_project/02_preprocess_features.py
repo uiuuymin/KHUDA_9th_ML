@@ -1,17 +1,10 @@
 # 02_preprocess_features.py
 # Build product-level features from:
-# - nike_products.csv (product metadata, includes trade_count from crawler)
-# - nike_trades.csv   (raw trades up to 2000, all sizes)
+# - 01_nike_products.csv (product metadata)
+# - 01_nike_trades.csv   (raw trades, all sizes)
 #
 # Output:
-# - features_product_level.csv
-#
-# Requirements applied:
-# - retail_price -> release_price (column name)
-# - keep only trade_count (drop crawl meta like status/error/collected_at)
-# - trade-derived features: trade_count_total, trade_count_golden,
-#   golden_mean_unweighted, golden_mean_weighted
-# - week/labeling calculations are NOT done (only placeholder columns exist if present in products)
+# - 02_features_product_level.csv
 
 import pandas as pd
 
@@ -25,18 +18,19 @@ GOLDEN_SIZES = {"235", "240", "245", "265", "270", "275"}
 # Load
 # ----------------------
 products = pd.read_csv(PRODUCTS_CSV, dtype={"product_id": str})
-trades = pd.read_csv(TRADES_CSV, dtype={"product_id": str, "size": str})
+trades   = pd.read_csv(TRADES_CSV,   dtype={"product_id": str, "size": str})
 
 # ----------------------
 # Clean trades
 # ----------------------
 trades["product_id"] = trades["product_id"].astype(str).str.strip()
-trades["size"] = trades["size"].astype(str).str.strip()
-trades["price"] = pd.to_numeric(trades["price"], errors="coerce")
+trades["size"]       = trades["size"].astype(str).str.strip()
+trades["price"]      = pd.to_numeric(trades["price"], errors="coerce")
 
-# Keep only exact duplicates removal (avoid over-dedup that can undercount)
-# If you suspect scroll duplicates are heavy, this is still a safe level.
-trades = trades.drop_duplicates(subset=["product_id", "size", "price", "date_str"], keep="first")
+# ✅ date_str 제거됨 → trade_date 기준으로 중복 제거
+trades = trades.drop_duplicates(
+    subset=["product_id", "size", "price", "trade_date"], keep="first"
+)
 
 # Golden subset
 golden = trades[trades["size"].isin(GOLDEN_SIZES)].copy()
@@ -44,105 +38,113 @@ golden = trades[trades["size"].isin(GOLDEN_SIZES)].copy()
 # ----------------------
 # Trade-derived features
 # ----------------------
-# Total trade count (all sizes, up to 2000)
+# 전체 거래 수 (전체 사이즈)
 trade_count_total = (
     trades.groupby("product_id", as_index=False)
-    .size()
-    .rename(columns={"size": "trade_count_total"})
+          .size()
+          .rename(columns={"size": "trade_count_total"})
 )
 
-# Golden trade count (golden sizes only)
+# 골든사이즈 거래 수
 trade_count_golden = (
     golden.groupby("product_id", as_index=False)
-    .size()
-    .rename(columns={"size": "trade_count_golden"})
+          .size()
+          .rename(columns={"size": "trade_count_golden"})
 )
 
-# Golden weighted mean (all golden trades mean)
+# 골든사이즈 가중 평균가 (전체 골든 거래 평균)
 golden_mean_weighted = (
     golden.groupby("product_id", as_index=False)["price"]
-    .mean()
-    .rename(columns={"price": "golden_mean_weighted"})
+          .mean()
+          .rename(columns={"price": "golden_mean_weighted"})
 )
 
-# Golden unweighted mean:
-# 1) mean price per size
-# 2) average those size means (simple average across sizes, ignoring missing)
+# 골든사이즈 비가중 평균가 (사이즈별 평균 → 사이즈 평균)
 size_means = (
     golden.groupby(["product_id", "size"], as_index=False)["price"]
-    .mean()
-    .rename(columns={"price": "avg_price"})
+          .mean()
+          .rename(columns={"price": "avg_price"})
 )
-
 pivot = size_means.pivot(index="product_id", columns="size", values="avg_price").reset_index()
-
-# Ensure all six sizes exist as columns (so mean uses consistent set)
 for s in GOLDEN_SIZES:
     if s not in pivot.columns:
         pivot[s] = pd.NA
-
-size_cols = sorted(list(GOLDEN_SIZES))  # ["235","240","245","265","270","275"]
+size_cols = sorted(list(GOLDEN_SIZES))
 pivot["golden_mean_unweighted"] = pivot[size_cols].mean(axis=1, skipna=True)
-
 golden_mean_unweighted = pivot[["product_id", "golden_mean_unweighted"]].copy()
 
 # ----------------------
-# Build final feature table
+# Clean products
 # ----------------------
-# Rename product columns to English (robust to missing optional columns)
-rename_map = {
-    "name": "product_name",
-    "모델번호": "model_number",
-    "관심수": "wish_count",         # in case older file
-    "wish_count": "wish_count",
-    "발매일": "release_date",
-    "발매가": "release_price",
-    "retail_price": "release_price", # safety
-    "색상": "color",
-    "한정판 여부": "is_limited",
-    "국내발매 여부": "is_domestic",
-    "콜라보 여부": "is_collaboration",
-    "구글트랜드 분석 결과": "google_trend_score",
-    "라벨링": "label",
-}
+# ✅ 크롤러가 이미 영어 컬럼으로 저장 → rename 불필요
+# ✅ 확정 컬럼 기준: is_limited / is_domestic / google_trend_score 제거
+# ✅ google_trend 3개는 trade CSV 소속이므로 여기서 집계하지 않음
+# ✅ trade_count(크롤러 메타) 제거, trade_count_total로 대체
 
-products = products.rename(columns={k: v for k, v in rename_map.items() if k in products.columns})
+drop_cols = ["product_name", "model_number", "trade_count", "status", "error", "collected_at"]
+products  = products.drop(columns=[c for c in drop_cols if c in products.columns])
 
-# Keep only required product columns + trade_count
-required_product_cols = [
+# release_price 숫자 변환
+if "release_price" in products.columns:
+    products["release_price"] = (
+        products["release_price"].astype(str)
+          .str.replace(",", "", regex=False)
+          .str.replace("원", "", regex=False)
+    )
+    products["release_price"] = pd.to_numeric(products["release_price"], errors="coerce")
+
+# release_date 날짜 변환
+if "release_date" in products.columns:
+    products["release_date"] = pd.to_datetime(products["release_date"], errors="coerce")
+
+# is_collaboration → int (수기 입력값 정리)
+if "is_collaboration" in products.columns:
+    products["is_collaboration"] = products["is_collaboration"].fillna(0).astype(int)
+else:
+    products["is_collaboration"] = 0
+
+# wish_count 숫자 변환
+if "wish_count" in products.columns:
+    products["wish_count"] = pd.to_numeric(products["wish_count"], errors="coerce")
+
+# 필수 NaN 제거
+products = products.dropna(subset=["release_date", "release_price"])
+products = products[products["release_price"] > 0]
+
+# product_id 중복 제거 (첫 행 유지)
+products = products.drop_duplicates(subset=["product_id"], keep="first")
+
+# ----------------------
+# 최종 컬럼 구성
+# ----------------------
+# ✅ 확정 컬럼 기준 product-level feature
+final_product_cols = [
     "product_id",
-    "product_name",
-    "model_number",
     "wish_count",
     "release_date",
     "release_price",
     "color",
-    "is_limited",
-    "is_domestic",
     "is_collaboration",
-    "google_trend_score",
-    "label",
-    "trade_count",  # keep only this meta
 ]
-
-# Create missing required columns as NA (to avoid KeyError)
-for c in required_product_cols:
+for c in final_product_cols:
     if c not in products.columns:
         products[c] = pd.NA
 
-features = products[required_product_cols].copy()
+features = products[final_product_cols].copy()
 
-# Merge trade-derived features
-features = features.merge(trade_count_total, on="product_id", how="left")
-features = features.merge(trade_count_golden, on="product_id", how="left")
+# trade-derived feature 병합
+features = features.merge(trade_count_total,      on="product_id", how="left")
+features = features.merge(trade_count_golden,     on="product_id", how="left")
 features = features.merge(golden_mean_unweighted, on="product_id", how="left")
-features = features.merge(golden_mean_weighted, on="product_id", how="left")
+features = features.merge(golden_mean_weighted,   on="product_id", how="left")
 
-# Fill counts with 0 if no trades
-features["trade_count_total"] = features["trade_count_total"].fillna(0).astype(int)
+# 거래 수 NaN → 0
+features["trade_count_total"]  = features["trade_count_total"].fillna(0).astype(int)
 features["trade_count_golden"] = features["trade_count_golden"].fillna(0).astype(int)
 
-# Save
+# ----------------------
+# 저장
+# ----------------------
 features.to_csv(OUT_FEATURES, index=False, encoding="utf-8-sig")
-print("Saved:", OUT_FEATURES)
-print("Columns:", list(features.columns))
+print(f"[완료] 저장: {OUT_FEATURES}")
+print(f"       행 수: {len(features):,} | 컬럼: {list(features.columns)}")
