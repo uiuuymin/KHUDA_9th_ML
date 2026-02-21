@@ -20,12 +20,12 @@ import numpy as np
 # =========================================================
 # ✅ 파일 경로 설정 — 여기만 수정하면 됩니다
 # =========================================================
-INPUT_PRODUCTS_CSV = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_product_81-100.csv"
-INPUT_TRADES_CSV   = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_trade_81-100.csv"
+INPUT_PRODUCTS_CSV = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_product_101-120.csv"
+INPUT_TRADES_CSV   = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_trade_101-120.csv"
 
 INPUT_TRENDS_CSV   = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\time_series_KR_20190725-0000_20260220-2213.csv"
 
-OUTPUT_CSV         = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\03_google_trade_81-100.csv"
+OUTPUT_CSV         = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\03_google_trade_101-120.csv"
 
 COLLECTION_DATE    = pd.to_datetime("2026-02-19")
 TREND_COL_NAME     = "Nike"
@@ -196,9 +196,6 @@ if __name__ == "__main__":
     # trade_date 포맷
     out["trade_date"] = pd.to_datetime(out["trade_date"], errors="coerce").dt.strftime("%Y-%m-%d")
     out["product_id"] = out["product_id"].astype(str)
-
-    # 중복 제거
-    out = out.drop_duplicates(subset=["product_id", "trade_date", "current_price"], keep="last")
 
     # 6) 저장 (덮어쓰기 방식: 매번 깨끗하게)
     os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
