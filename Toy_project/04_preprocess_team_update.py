@@ -8,9 +8,9 @@ import os
 # ════════════════════════════════════════════════
 # 파일 경로 설정 — 여기서만 수정하면 됩니다
 # ════════════════════════════════════════════════
-INPUT_PRODUCT_CSV = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_product_81-100.csv"
-INPUT_TRADE_CSV   = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\03_google_trade_81-100.csv"
-OUTPUT_CSV        = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_81-100.csv"
+INPUT_PRODUCT_CSV = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\preprocess_dataset\KREAM_product_101-120.csv"
+INPUT_TRADE_CSV   = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\03_google_trade_101-120.csv"
+OUTPUT_CSV        = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_101-120.csv"
 # ════════════════════════════════════════════════
 
 COLLECTION_DATE = pd.to_datetime("2026-02-19")
