@@ -8,15 +8,15 @@ import warnings
 # ════════════════════════════════════════════════
 
 INPUT_FILES = [
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_1-20.csv",
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_21-40.csv",
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_41-60.csv",
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_61-80.csv",
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_81-100.csv",
-    r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\04_preprocessed_101-120.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_1-20.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_21-40.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_41-60.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_61-80.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_81-100.csv",
+    r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\04_preprocessed_101-120.csv",
 ]
 
-OUTPUT_FILE = r"C:\Users\lg\min_python\KHUDA\9_ML_TP_KREAM\outputs\05_merged_dataset.csv"
+OUTPUT_FILE = r"C:\Users\lg\min_python\KHUDA\KHUDA_9_ML\Toy_project\outputs\05_merged_dataset.csv"
 
 # ════════════════════════════════════════════════
 
