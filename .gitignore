@@ -1,1 +1,7 @@
- 
+ # Ignore specific project folders
+Toy_project/meeting/
+Toy_project/not_use/
+
+# Ignore specific files
+Toy_project/KREAM_data.ipynb
+Toy_project/product_ids.txt
