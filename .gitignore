@@ -1,7 +1,13 @@
  # Ignore specific project folders
 Toy_project/meeting/
 Toy_project/not_use/
+KREAM/
+.vscode/
 
 # Ignore specific files
 Toy_project/KREAM_data.ipynb
 Toy_project/product_ids.txt
+Toy_project/column_guide.html
+Toy_project/modeling_guide.html
+Toy_project/kream_guide.html
+Toy_project/프로젝트_최종_정리.docx
