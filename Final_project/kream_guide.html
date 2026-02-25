@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KREAM 프리미엄 예측 프로젝트 — 팀원 가이드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Noto+Sans+KR:wght@400;500;600;700&family=Gmarket+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --white: #ffffff;
+  --border: #e2e8f4;
+  --border-strong: #c5cfdf;
+  --text: #1a2035;
+  --text-sub: #4a5472;
+  --text-dim: #8a95b0;
+  --blue: #2a5fe0;
+  --blue-light: #eef3fd;
+  --blue-mid: #4a7ff0;
+  --green: #0f9b6e;
+  --green-light: #e6f7f1;
+  --orange: #d4700a;
+  --orange-light: #fff4e6;
+  --red: #c0392b;
+  --red-light: #fdf0ee;
+  --purple: #6a3fc8;
+  --purple-light: #f2edff;
+  --grey: #f0f3f9;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+  --display: 'Gmarket Sans', 'Noto Sans KR', sans-serif;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(30,50,100,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: var(--sans);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ── 사이드바 레이아웃 ── */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  padding: 28px 0 40px;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-logo .brand {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--blue);
+  display: block;
+}
+.sidebar-logo .sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.nav-group { margin-bottom: 6px; }
+.nav-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 8px 20px 4px;
+}
+.nav-item {
+  display: block;
+  padding: 7px 20px;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.nav-item:hover { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); }
+.nav-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); font-weight: 600; }
+
+.main {
+  margin-left: 240px;
+  padding: 40px 48px 100px;
+  max-width: 1100px;
+}
+
+/* ── 페이지 헤더 ── */
+.page-header {
+  background: linear-gradient(135deg, #1a2e6e 0%, #2a5fe0 60%, #4a7ff0 100%);
+  border-radius: var(--radius);
+  padding: 40px 44px;
+  margin-bottom: 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: 80px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.page-header h1 {
+  font-family: var(--display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.page-header p { font-size: 0.9rem; opacity: 0.85; max-width: 600px; }
+.header-tags { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.header-tag {
+  font-size: 0.72rem;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  color: white;
+}
+
+/* ── 섹션 헤더 ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 48px 0 20px;
+}
+.section-number {
+  font-family: var(--display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 32px; height: 32px;
+  background: var(--blue);
+  color: white;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.section-desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-bottom: 20px;
+  padding-left: 44px;
+}
+
+/* ── 파이프라인 박스 ── */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0 0 32px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.pipe-step {
+  flex: 1;
+  min-width: 120px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  position: relative;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.pipe-step + .pipe-step { margin-left: -1px; border-radius: 0; }
+.pipe-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.pipe-step:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.pipe-step.active { background: var(--blue-light); border-color: var(--blue); z-index: 1; }
+.pipe-step.active .pipe-num { background: var(--blue); color: white; }
+.pipe-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin: 0 -6px;
+  z-index: 2;
+  position: relative;
+}
+.pipe-num {
+  width: 24px; height: 24px;
+  background: var(--grey);
+  color: var(--text-sub);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+}
+.pipe-label { font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+.pipe-sub { font-size: 0.68rem; color: var(--text-dim); margin-top: 4px; }
+
+/* ── 모델 흐름도 ── */
+.model-flow {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr 40px 1fr 40px 1fr;
+  align-items: center;
+  gap: 0;
+  margin: 24px 0;
+}
+.flow-box {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.flow-box.model1 { border-color: #4a7ff0; background: #f0f5ff; }
+.flow-box.feature-sel { border-color: #0f9b6e; background: #e6f7f1; }
+.flow-box.model2 { border-color: #6a3fc8; background: #f2edff; }
+.flow-box.th4 { border-color: #d4700a; background: #fff4e6; }
+.flow-arrow { text-align: center; color: var(--text-dim); font-size: 1.4rem; }
+.flow-label { font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
+.flow-sub { font-size: 0.68rem; color: var(--text-sub); }
+
+/* ── 카드 ── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: 0 4px 20px rgba(30,50,100,0.11); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  background: var(--grey);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.col-name {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--blue);
+}
+.tag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+.tag.origin   { background: #f0f3f9; color: #5a6380; border: 1px solid #c5cfdf; }
+.tag.derived  { background: var(--blue-light); color: var(--blue); border: 1px solid #b8ccf4; }
+.tag.new      { background: var(--green-light); color: var(--green); border: 1px solid #a0ddc8; }
+.tag.leakage  { background: var(--red-light); color: var(--red); border: 1px solid #eaada8; }
+.tag.onehot   { background: var(--purple-light); color: var(--purple); border: 1px solid #c8b8f0; }
+.tag.target   { background: #fff3cd; color: #856404; border: 1px solid #f0d080; }
+
+.card-body { padding: 16px 18px; }
+
+.formula-block {
+  font-family: var(--mono);
+  font-size: 0.77rem;
+  background: #f8f9fc;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue-mid);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  color: #2a3a5a;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+.desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+.desc strong { color: var(--text); font-weight: 600; }
+.meaning {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 12px;
+  background: var(--blue-light);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 5px 5px 0;
+  color: var(--blue);
+  font-size: 0.83rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.meaning.green { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.meaning.orange { background: var(--orange-light); border-color: var(--orange); color: var(--orange); }
+.meaning.red { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.meaning.purple { background: var(--purple-light); border-color: var(--purple); color: var(--purple); }
+
+.warn-note {
+  font-size: 0.77rem;
+  color: var(--red);
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--red-light);
+  border-radius: 5px;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.warn-note::before { content: '⚠'; flex-shrink: 0; }
+
+.info-note {
+  font-size: 0.77rem;
+  color: var(--text-sub);
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--grey);
+  border-radius: 5px;
+}
+
+/* ── 콜아웃 ── */
+.callout {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  margin: 16px 0;
+}
+.callout.blue   { background: var(--blue-light); border: 1px solid #b8ccf4; }
+.callout.green  { background: var(--green-light); border: 1px solid #a0ddc8; }
+.callout.orange { background: var(--orange-light); border: 1px solid #f5c490; }
+.callout.red    { background: var(--red-light); border: 1px solid #eaada8; }
+.callout.purple { background: var(--purple-light); border: 1px solid #c8b8f0; }
+.callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.callout-body { font-size: 0.84rem; line-height: 1.6; color: var(--text); }
+.callout-body strong { font-weight: 600; display: block; margin-bottom: 4px; }
+
+/* ── 비교 테이블 ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 16px 0;
+}
+.compare-table th {
+  background: var(--blue);
+  color: white;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+}
+.compare-table th:first-child { border-radius: 8px 0 0 0; }
+.compare-table th:last-child { border-radius: 0 8px 0 0; }
+.compare-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.compare-table tr:nth-child(even) td { background: #f8f9fc; }
+.compare-table tr:hover td { background: var(--blue-light); }
+
+/* ── 모델 카드 그리드 ── */
+.model-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+.model-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.model-card.m1 { border-top: 3px solid #4a7ff0; }
+.model-card.m1th { border-top: 3px solid #d4700a; }
+.model-card.m2 { border-top: 3px solid #6a3fc8; }
+.model-card.m2th { border-top: 3px solid #0f9b6e; }
+.model-card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+.model-card-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.6; }
+.model-badge {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-orange { background: var(--orange-light); color: var(--orange); }
+.badge-purple { background: var(--purple-light); color: var(--purple); }
+.badge-green { background: var(--green-light); color: var(--green); }
+
+/* ── 발표 포인트 ── */
+.present-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff8e1;
+  border: 1px solid #f5d060;
+  border-left: 4px solid #f0a000;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-size: 0.83rem;
+  color: #5a4000;
+  line-height: 1.6;
+}
+.present-icon { font-size: 1rem; flex-shrink: 0; }
+
+/* ── 한계점 ── */
+.limit-list { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+.limit-item {
+  display: flex; gap: 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  box-shadow: var(--shadow);
+}
+.limit-num {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  background: var(--red);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.limit-text strong { display: block; font-size: 0.85rem; color: var(--text); margin-bottom: 2px; }
+.limit-text span { color: var(--text-sub); }
+
+/* ── 범례 ── */
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-sub); }
+
+/* ── 스크롤 타겟 ── */
+.anchor { scroll-margin-top: 24px; }
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px 20px 80px; }
+  .model-grid { grid-template-columns: 1fr; }
+  .model-flow { grid-template-columns: 1fr; }
+  .flow-arrow { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── 사이드바 ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="brand">KREAM Guide</span>
+    <span class="sub">프리미엄 등급 예측 프로젝트</span>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">프로젝트</div>
+    <a class="nav-item active" href="#overview">🗺 프로젝트 개요</a>
+    <a class="nav-item" href="#pipeline">⚙ 전체 파이프라인</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">피처 설명서</div>
+    <a class="nav-item" href="#sec-product">1. 제품 기본 정보</a>
+    <a class="nav-item" href="#sec-size">2. 사이즈</a>
+    <a class="nav-item" href="#sec-trade">3. 거래 기본 정보</a>
+    <a class="nav-item" href="#sec-trend">4. 구글 트렌드</a>
+    <a class="nav-item" href="#sec-wish">5. Wish 관련</a>
+    <a class="nav-item" href="#sec-demand">6. 수요 강도 대리</a>
+    <a class="nav-item" href="#sec-extra">7. 추가 파생 피처</a>
+    <a class="nav-item" href="#sec-quality">8. 데이터 품질</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">모델링</div>
+    <a class="nav-item" href="#modeling-overview">모델링 흐름</a>
+    <a class="nav-item" href="#clustering">Step1: 클러스터링</a>
+    <a class="nav-item" href="#split">Step2: 데이터 분할</a>
+    <a class="nav-item" href="#model1">Step3: Model 1</a>
+    <a class="nav-item" href="#th4">Step4: TH4 후처리</a>
+    <a class="nav-item" href="#feature-sel">Step5: Feature Selection</a>
+    <a class="nav-item" href="#model2">Step6: Model 2</a>
+    <a class="nav-item" href="#compare">Step7: 4모델 비교</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">기타</div>
+    <a class="nav-item" href="#limits">한계점</a>
+    <a class="nav-item" href="#present">발표 포인트</a>
+  </div>
+</nav>
+
+<!-- ── 메인 ── -->
+<main class="main">
+
+<!-- 페이지 헤더 -->
+<div class="page-header">
+  <h1>KREAM 프리미엄 등급 예측 프로젝트</h1>
+  <p>코드에 직접 참여하지 않은 팀원도 이해할 수 있도록 제작된 종합 가이드입니다.<br>피처의 의미·수식·이유, 모델링 전체 흐름, 발표 포인트를 한 곳에 정리했습니다.</p>
+  <div class="header-tags">
+    <span class="header-tag">데이터: KREAM 120개 신발</span>
+    <span class="header-tag">모델: XGBoost 다중 분류</span>
+    <span class="header-tag">타겟: 프리미엄 등급 0~4</span>
+    <span class="header-tag">기준일: 2026-02-19</span>
+  </div>
+</div>
+
+<!-- ── 0. 프로젝트 개요 ── -->
+<div id="overview" class="anchor">
+  <div class="section-header">
+    <div class="section-number">0</div>
+    <div class="section-title">프로젝트 개요</div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <div class="callout-icon">🎯</div>
+  <div class="callout-body">
+    <strong>한 줄 요약</strong>
+    패션에 관심 있는 대학생이 "이 신발, 지금 사야 할까? 아니면 기다려야 할까?"를 판단할 수 있도록, 발매 후 n일 시점의 프리미엄 등급을 예측하는 모델을 만듭니다.
+  </div>
+</div>
+
+<table class="compare-table" style="margin-top:16px">
+  <tr><th>항목</th><th>내용</th></tr>
+  <tr><td><strong>입력 (Feature)</strong></td><td>오늘까지 관측 가능한 제품 정보 + 거래 정보 + 관심도</td></tr>
+  <tr><td><strong>출력 (Target)</strong></td><td>프리미엄 등급 클래스 (0: 최저 ~ 4: 폭등)</td></tr>
+  <tr><td><strong>사용자 시나리오</strong></td><td>"발매 후 30일 시점" 입력 → 해당 시점 예상 프리미엄 등급 출력</td></tr>
+  <tr><td><strong>대상 데이터</strong></td><td>KREAM 나이키 신발 120개 제품의 거래 내역 (2019.07 ~ 2026.02)</td></tr>
+  <tr><td><strong>프리미엄 비율 수식</strong></td><td><code>(현재 거래가 - 발매가) / 발매가</code> → KMeans로 5단계 라벨화</td></tr>
+</table>
+
+<!-- ── 1. 전체 파이프라인 ── -->
+<div id="pipeline" class="anchor">
+  <div class="section-header">
+    <div class="section-number" style="background:#2a5fe0">P</div>
+    <div class="section-title">전체 파이프라인</div>
+  </div>
+  <p class="section-desc">데이터 수집부터 최종 예측까지의 전체 흐름입니다.</p>
+</div>
+
+<div class="pipeline">
+  <div class="pipe-step">
+    <div class="pipe-num">01</div>
+    <div class="pipe-label">데이터 수집</div>
+    <div class="pipe-sub">KREAM 크롤링<br>Google Trends CSV</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">02</div>
+    <div class="pipe-label">구글 트렌드 매핑</div>
+    <div class="pipe-sub">월별→일별 보간<br>발매일·거래일 매핑</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step active">
+    <div class="pipe-num">03</div>
+    <div class="pipe-label">전처리 & 피처 생성</div>
+    <div class="pipe-sub">색상 one-hot<br>파생 피처 25개+</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">04</div>
+    <div class="pipe-label">클러스터링</div>
+    <div class="pipe-sub">K-Means → 5등급<br>타겟 라벨 생성</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">05</div>
+    <div class="pipe-label">데이터 분할</div>
+    <div class="pipe-sub">제품 단위 8:2<br>GroupSplit</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">06</div>
+    <div class="pipe-label">Model 1 학습</div>
+    <div class="pipe-sub">XGBoost<br>전체 피처</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">07</div>
+    <div class="pipe-label">Feature Selection</div>
+    <div class="pipe-sub">VIF + Importance<br>피처 정제</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">08</div>
+    <div class="pipe-label">Model 2 학습</div>
+    <div class="pipe-sub">XGBoost<br>정제 피처</div>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="pipe-num">09</div>
+    <div class="pipe-label">4모델 비교 평가</div>
+    <div class="pipe-sub">TH4 후처리<br>최종 선택</div>
+  </div>
+</div>
+
+<!-- ─────────────────────────── 피처 설명서 ─────────────────────────── -->
+
+<!-- 범례 -->
+<div class="legend">
+  <strong style="font-size:0.8rem;color:var(--text);margin-right:4px">태그 설명:</strong>
+  <div class="legend-item"><span class="tag origin">원본</span> 크롤링 데이터 그대로</div>
+  <div class="legend-item"><span class="tag derived">파생</span> 기존 컬럼으로 계산</div>
+  <div class="legend-item"><span class="tag new">신규</span> 이번 전처리에서 새로 추가</div>
+  <div class="legend-item"><span class="tag leakage">누수주의</span> 직접 피처로 쓰면 미래 정보 포함</div>
+  <div class="legend-item"><span class="tag onehot">원-핫</span> 범주형 인코딩</div>
+  <div class="legend-item"><span class="tag target">타겟</span> 예측 대상(y)</div>
+</div>
+
+<!-- ── 1. 제품 기본 정보 ── -->
+<div id="sec-product" class="anchor">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">제품 기본 정보</div>
+  </div>
+  <p class="section-desc">product CSV에서 가져오는 컬럼들입니다. 제품 자체의 속성을 나타냅니다.</p>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">product_id</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">KREAM 플랫폼이 각 신발에 부여한 <strong>고유 식별 번호</strong>.<br>
+      <span class="meaning">모든 집계·조인의 기준 키야. 숫자이지만 의미는 없고, 그냥 제품 구분자야. 외부 검색 불가.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">release_date</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">해당 제품이 공식적으로 <strong>처음 출시된 날짜</strong>.<br>
+      <div class="info-note">💡 오래된 제품은 KREAM 데이터 누락이 많아, 기록이 없으면 <strong>첫 거래일을 발매일로 대체</strong>했어.</div>
+      <span class="meaning">days_since_release 등 시간 기반 파생 피처의 기준점이야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">release_price</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">브랜드가 정한 <strong>공식 출시 가격</strong> (단위: 원).<br>
+      <span class="meaning">프리미엄 비율의 분모야. 출시가가 높을수록 같은 거래가에서 프리미엄 비율이 낮게 나와.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">is_collaboration</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">유명 브랜드·아티스트와의 <strong>콜라보레이션 여부</strong>. 맞으면 1, 아니면 0.<br>
+      <span class="meaning">콜라보 제품은 희소성이 높아 프리미엄이 강하게 형성되는 경향이 있어. 중요한 범주형 피처야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="col-name">color_white / color_black / ... (11개)</span>
+    <span class="tag onehot">원-핫</span>
+  </div>
+  <div class="card-body">
+    <div class="formula-block">색상 문자열 → COLOR_SYNONYMS 동의어 테이블로 매핑 → 0 또는 1
+예) "오프화이트" → color_white = 1
+    "네이비"    → color_navy  = 1
+    복합색이면 여러 컬럼 동시에 1 가능
+
+11개 색상: white / black / grey / brown / pink / blue / navy / green / red / orange / yellow
+↑ Red와 Yellow를 통합하지 않은 이유: 실제 데이터에서 Red는 프리미엄이 오르고 Yellow는 떨어지는 패턴이 달랐기 때문.</div>
+    <div class="desc">제품 색상을 11개 카테고리로 인코딩한 것.<br>
+      <span class="meaning">색상에 따라 수요가 달라지기 때문에 피처로 포함했어. 기본 색상(검정·흰색)은 수요가 안정적이고, 특수 색상은 희소성이 높아.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">wish_count</span><span class="tag leakage">누수주의</span></div>
+  <div class="card-body">
+    <div class="desc">KREAM에서 해당 제품을 <strong>위시리스트에 추가한 사람 수</strong>. 크롤링 시점(2026-02-19) 기준이야.<br>
+      <span class="meaning green">관심도의 절대적인 크기를 나타내. 값이 클수록 많은 사람이 원하는 제품이야.</span>
+      <div class="warn-note">크롤링 시점의 총합 수치라 미래 정보가 포함돼 있어. 직접 피처로 쓰면 안 되고, adjusted_wish로 보정해서 써야 해.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. 사이즈 ── -->
+<div id="sec-size" class="anchor">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">사이즈</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">size</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">해당 거래의 <strong>신발 사이즈</strong> (단위: mm).<br>
+      <span class="meaning">같은 제품이라도 사이즈에 따라 수요·프리미엄이 크게 달라질 수 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">golden_size</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">235 ≤ size ≤ 245  →  1  (여성 주요 사이즈대)
+265 ≤ size ≤ 275  →  1  (남성 주요 사이즈대)
+그 외              →  0</div>
+    <div class="desc">수요가 집중되는 <strong>황금 사이즈 여부</strong>.<br>
+      <span class="meaning">황금 사이즈는 구매 수요가 많아서 프리미엄이 더 높게 형성되는 경향이 있어. 희소성과 수요가 동시에 높은 구간이야.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. 거래 기본 정보 ── -->
+<div id="sec-trade" class="anchor">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">거래 기본 정보</div>
+  </div>
+  <p class="section-desc">trade CSV에서 가져오거나, 거래 데이터로부터 계산한 컬럼들입니다.</p>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trade_date</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">해당 거래가 <strong>실제로 발생한 날짜</strong>.<br>
+      <span class="meaning">각 행의 시점을 나타내는 기준이야. 모델링에서는 직접 피처로 쓰지 않고, 파생 피처 계산에 쓰여.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">current_price</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">해당 거래에서 실제로 <strong>체결된 가격</strong> (단위: 원).<br>
+      <span class="meaning">2차 시장에서 소비자가 실제로 지불한 금액이야. premium_ratio 계산의 핵심 재료야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">premium_ratio</span><span class="tag target">타겟 원천</span></div>
+  <div class="card-body">
+    <div class="formula-block">premium_ratio = (current_price - release_price) / release_price
+
+예) 출시가 10만 원짜리가 15만 원에 팔리면 → premium_ratio = 0.5 (50% 프리미엄)
+    음수면 출시가보다 낮게 팔린 것 (역프리미엄)</div>
+    <div class="desc">출시가 대비 <strong>현재 거래가의 프리미엄 비율</strong>.<br>
+      <span class="meaning purple">이 값이 K-Means 클러스터링의 입력이자, 모델의 타겟(y)을 만드는 기반이야. current_price와 release_price 모두 해당 거래 시점에 알 수 있는 값이라 누수가 아니야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">first_trade_date</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">first_trade_date = product_id별 trade_date의 최솟값</div>
+    <div class="desc">해당 제품의 <strong>첫 번째 거래가 발생한 날짜</strong>.<br>
+      <span class="meaning">제품이 2차 시장에서 언제부터 거래되기 시작했는지를 나타내. days_since_first_trade 등 시간 피처의 기준점이야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">days_since_first_trade</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">days_since_first_trade = (trade_date - first_trade_date).days</div>
+    <div class="desc">첫 거래일로부터 <strong>현재 거래일까지 경과한 일수</strong>.<br>
+      0이면 첫 거래 당일, 값이 클수록 시간이 많이 지난 거래야.<br>
+      <span class="meaning">시간에 따른 프리미엄 변화 패턴을 잡는 핵심 피처야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">cum_trade_count_product</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">cum_trade_count_product = 제품별 거래 행의 순서 번호 (1부터 시작)
+→ groupby(product_id).cumcount() + 1</div>
+    <div class="desc">해당 거래까지 <strong>누적으로 몇 번째 거래인지</strong>를 나타내는 값.<br>
+      <span class="meaning">시간이 지날수록 누적 거래량이 많아지므로, 제품의 전반적인 인기·유동성을 나타내는 간접 지표야.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. 구글 트렌드 ── -->
+<div id="sec-trend" class="anchor">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">구글 트렌드</div>
+  </div>
+  <p class="section-desc">구글 트렌드 CSV(검색어: "Nike", 2019.07~2026.02)에서 매핑한 값들입니다.</p>
+</div>
+
+<div class="callout orange">
+  <div class="callout-icon">📌</div>
+  <div class="callout-body">
+    <strong>구글 트렌드 사용 방식</strong>
+    구글 트렌드는 <strong>기간 내 상대지수(0~100)</strong>야. 제품별 정확한 키워드 수집이 어려워 "Nike" 단일 키워드로 2019.07~2026.02 전체를 수집했어. 덕분에 제품 간 비교가 가능한 공통 기준이 생겼지만, 개별 신발의 정확한 관심도는 아니야. <strong>google_trend_pre는 수집 기간 한계로 최종 제외</strong>됐어.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">google_trend_release</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">제품 <strong>출시 시점의 구글 검색 트렌드 지수</strong> (0~100).<br>
+      <span class="meaning">출시 당시 얼마나 화제가 됐는지를 나타내. 출시 시점 관심도가 높을수록 초기 프리미엄이 높게 형성되는 경향이 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">google_trend_n_day</span><span class="tag origin">원본</span></div>
+  <div class="card-body">
+    <div class="desc">해당 <strong>거래 시점의 구글 검색 트렌드 지수</strong> (0~100).<br>
+      <span class="meaning">거래가 이뤄지는 시점에도 여전히 관심이 높은지를 나타내. 출시 후에도 검색이 유지된다는 건 지속적인 수요가 있다는 신호야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trend_retention</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">trend_retention = google_trend_n_day / (google_trend_release + 1)
+
+분모에 +1: google_trend_release가 0일 때 0÷0을 방지하기 위해서야.
+값 해석:
+  > 1.0 → 출시 때보다 오히려 관심이 올라간 것
+  = 1.0 → 출시와 똑같은 관심도 유지
+  < 1.0 → 관심이 식은 것</div>
+    <div class="desc">출시 시점 트렌드 대비 <strong>거래 시점 트렌드가 얼마나 유지되는지</strong>의 비율.<br>
+      <span class="meaning">관심도가 얼마나 지속되는지를 나타내. 트렌드가 유지될수록 프리미엄도 유지되는 경향이 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">adjusted_google_trend</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">adjusted_google_trend = (google_trend_release × google_trend_n_day)
+                          / (google_trend_release + google_trend_n_day + 1)
+
+원리: 조화평균 — 두 값이 모두 높아야 큰 값이 나오는 구조
+
+예) release=80, n_day=10 → ≈ 8.9  (거래 시점 관심 낮음 → 낮게 평가)
+    release=80, n_day=70 → ≈ 37.3 (둘 다 높음 → 높게 평가)</div>
+    <div class="desc">출시 트렌드와 거래 시점 트렌드의 <strong>조화 평균 방식 결합값</strong>.<br>
+      <span class="meaning">출시 때도 화제가 되고, 거래 시점에도 여전히 관심이 있는 제품을 높게 평가하는 피처야. 한쪽만 높으면 값이 작아져.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 5. Wish ── -->
+<div id="sec-wish" class="anchor">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Wish 관련</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">wish_per_day</span><span class="tag leakage">누수주의</span></div>
+  <div class="card-body">
+    <div class="formula-block">denom_days   = (COLLECTION_DATE - first_trade_date).days  ← 2026-02-19 기준
+wish_per_day = wish_count / denom_days</div>
+    <div class="desc">첫 거래일부터 크롤링 시점까지 <strong>하루 평균 wish가 얼마나 쌓였는지</strong>를 나타내는 중간 계산 변수야.<br>
+      <span class="meaning red">wish_count 기반이라 미래 정보야. 직접 학습 피처로 쓰지 말 것. adjusted_wish 계산에만 사용.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">adjusted_wish</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">adjusted_wish = wish_per_day × (days_since_first_trade + 1)
+             = wish_count × (days_since_first_trade + 1) / (COLLECTION_DATE - first_trade_date).days
+
+핵심 가정: wish_count는 첫 거래일부터 크롤링까지 매일 균등하게 증가한다.
+
+예) 크롤링까지 총 100일, wish_count=1000, 거래일이 50일 경과 → 500으로 추정</div>
+    <div class="desc">균등 증가 가정으로 <strong>해당 거래 시점의 wish 수를 추정한 값</strong>.<br>
+      완전한 해당 시점 값은 아니지만 wish_count 직접 사용보다는 누수가 완화돼.<br>
+      <span class="meaning orange">해당 시점의 관심도를 근사한 값이야. 보조 피처로 활용할 수 있어.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 6. 수요 강도 대리 ── -->
+<div id="sec-demand" class="anchor">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">수요 강도 대리 피처 <span style="font-size:0.75rem;font-weight:400;color:var(--green)">신규 추가</span></div>
+  </div>
+  <p class="section-desc">이번 전처리에서 새로 추가된 피처들입니다. wish 없이 수요 강도를 포착하기 위해 만들었어요.</p>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trade_velocity</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">trade_velocity = cum_trade_count_product / (days_since_first_trade + 1)
+
+분모에 +1: 첫 거래 당일(0일)의 0 나눗셈을 방지
+예) 10일 동안 거래가 30건 쌓였으면 → 30 / 11 ≈ 2.7</div>
+    <div class="desc">첫 거래 이후 <strong>하루 평균 누적 거래 수</strong>. 거래 속도를 나타내는 핵심 지표야.<br>
+      <span class="meaning">거래가 빠르게 쌓이는 제품일수록 수요가 강하다는 신호야. wish 없이 수요 강도를 나타내는 핵심 대리 피처야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trend_x_trade</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">trend_x_trade = adjusted_google_trend × trade_velocity</div>
+    <div class="desc">구글 트렌드(검색 관심)와 거래 속도를 <strong>곱한 상호작용 피처</strong>.<br>
+      검색 관심도 높고 + 거래도 빠르게 쌓이는 제품만 큰 값이 나와.<br>
+      <span class="meaning">검색 관심이 실제 거래로도 이어지고 있는지를 동시에 포착해. 관심만 많고 거래가 없거나, 거래는 있어도 검색이 없으면 값이 낮아져.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">early_trade_signal</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">early_trade_signal = (days_since_first_trade ≤ 7) × trade_velocity
+→ 첫 거래일 기준 7일 이내 거래면 trade_velocity 값 그대로
+→ 7일이 지난 거래는 모두 0</div>
+    <div class="desc">출시 <strong>초기 7일 이내의 거래 속도</strong>를 별도로 포착한 피처야.<br>
+      <span class="meaning orange">출시 직후 폭발적인 수요가 있었는지를 나타내. 초기에 거래가 몰린 제품은 이후에도 높은 프리미엄을 유지하는 경향이 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">price_std_product</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">price_std_product = 제품별 누적 거래가격의 표준편차 (expanding std)
+→ groupby(product_id)['current_price'].expanding().std()
+
+첫 거래는 NaN (비교 대상 1개 → 표준편차 계산 불가), 두 번째 거래부터 계산됨</div>
+    <div class="desc">해당 거래까지 <strong>누적된 거래가격들의 표준편차</strong>.<br>
+      <span class="meaning">가격이 얼마나 들쑥날쑥한지를 나타내. 표준편차가 크면 프리미엄이 불안정하다는 신호, 작으면 거래가가 일정하게 유지된다는 뜻이야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trade_growth_7d</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">daily_trade_count = product_id × trade_date별 하루 거래 건수
+recent_7d         = 최근 7일 거래량 합산 (rolling 7)
+prev_7d           = 그 이전 7일 거래량 합산 (rolling 14 합산 - recent_7d)
+trade_growth_7d   = log(recent_7d + 1) - log(prev_7d + 1)
+
+로그를 쓰는 이유: 거래량이 갑자기 폭발적으로 늘어날 때 값이 너무 커지는 걸 방지
+양수 = 거래 가속 중 / 음수 = 거래 감속 중 / 0 근처 = 유사한 수준 유지</div>
+    <div class="desc">최근 7일 거래량이 이전 7일 대비 <strong>얼마나 증가했는지를 로그 스케일로 표현</strong>한 값.<br>
+      <span class="meaning">거래 모멘텀을 나타내. 거래가 가속되고 있으면 프리미엄도 오를 가능성이 높아.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 7. 추가 파생 피처 ── -->
+<div id="sec-extra" class="anchor">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">추가 파생 피처 <span style="font-size:0.75rem;font-weight:400;color:var(--green)">신규 추가</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">days_since_release</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">days_since_release = (trade_date - release_date).days
+
+※ days_since_first_trade와 비교:
+  days_since_first_trade : 2차 시장 첫 거래일 기준
+  days_since_release     : 브랜드 공식 출시일 기준 (더 이른 날짜)</div>
+    <div class="desc">공식 출시일로부터 <strong>해당 거래일까지 경과한 일수</strong>.<br>
+      <span class="meaning">출시 후 얼마나 됐는지를 공식 출시 기준으로 보는 피처야. 출시 직후일수록 초기 프리미엄이 높게 형성되는 경향이 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">hist_avg_premium</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">hist_avg_premium = 직전 거래까지의 premium_ratio 누적 평균
+→ groupby(product_id)['premium_ratio'].transform(
+     lambda x: x.shift(1).expanding().mean()
+  ).fillna(0)
+
+shift(1)    : 현재 거래의 premium_ratio는 제외 (미래 정보 방지!)
+expanding() : 직전 거래까지 누적 평균
+fillna(0)   : 첫 거래는 이전 값이 없으므로 0으로 대체</div>
+    <div class="desc">현재 거래 이전까지의 <strong>역대 평균 프리미엄 비율</strong>.<br>
+      예) 이전에 5번 거래됐고 프리미엄이 0.3, 0.4, 0.5, 0.4, 0.3이었다면 hist_avg_premium = 0.38<br>
+      <span class="meaning">이 제품이 지금까지 어느 정도의 프리미엄을 유지해왔는지를 나타내. 과거 프리미엄이 높은 제품은 앞으로도 높게 유지될 가능성이 있어.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">rolling_price_std</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">rolling_price_std = 직전 거래 기준 최근 7건 거래가격의 표준편차
+→ groupby(product_id)['current_price'].transform(
+     lambda x: x.shift(1).rolling(window=7, min_periods=2).std()
+  ).fillna(0)
+
+price_std_product(전체 누적)와 달리, 이건 최근 7건만 보는 단기 버전</div>
+    <div class="desc">직전 최대 7건 거래가격의 <strong>단기 가격 변동성</strong>.<br>
+      <span class="meaning">최근 거래가격이 얼마나 흔들리는지를 나타내. 값이 크면 가격이 불안정한 것, 작으면 최근 가격이 일정하게 유지되고 있다는 뜻이야.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trade_interval_density</span><span class="tag new">신규</span></div>
+  <div class="card-body">
+    <div class="formula-block">거래 간격     = 현재 거래일 - 직전 거래일 (일수)
+trade_interval_density = 직전 거래 기준 최근 3건 거래 간격의 합산 일수
+
+예) 최근 거래 간격이 1일, 2일, 1일 → 값 = 4 (거래 매우 밀집)
+    최근 거래 간격이 10일, 15일, 20일 → 값 = 45 (거래 드문드문)
+
+※ trade_velocity(누적 거래 속도)와 다른 피처야 — 이름 혼동 주의!</div>
+    <div class="desc">최근 3건 거래 간격의 <strong>합산 일수</strong>. 값이 <strong>작을수록</strong> 거래가 밀집되어 있다는 뜻이야.<br>
+      <span class="meaning">짧은 간격으로 거래가 몰리고 있다는 건 수요가 급증하고 있다는 신호야. 특히 최근 거래 활성화 여부를 포착할 수 있어.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── 8. 데이터 품질 ── -->
+<div id="sec-quality" class="anchor">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">데이터 품질</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">status</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="formula-block">이상값이 없으면: "-"
+있으면 해당하는 태그를 공백으로 연결:
+  [premium_ratio=inf]  → current_price / release_price 계산 오류
+  [adjusted_wish=NaN]  → wish_count 또는 날짜 계산 실패
+  [google_trend_*=NaN] → 트렌드 데이터 누락
+  [current_price&lt;0]    → 음수 거래가 (이상값)</div>
+    <div class="desc">해당 행에 <strong>데이터 품질 이슈가 있는지를 기록</strong>한 텍스트 컬럼.<br>
+      <span class="meaning">모델링 전에 이상한 행을 찾아내거나 필터링할 때 활용해. 정상 데이터는 "-"로 표시돼.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="col-name">trade_date_dt / release_date_dt</span><span class="tag derived">파생</span></div>
+  <div class="card-body">
+    <div class="desc">trade_date, release_date를 <strong>datetime 타입으로 변환</strong>한 컬럼. 날짜 계산 중간 변수야.<br>
+      <div class="info-note">📌 모델링 시 drop_cols에 넣어서 제외하는 게 좋아. 원본 문자열 컬럼과 중복됨.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════ 모델링 섹션 ═════════════════════ -->
+
+<div id="modeling-overview" class="anchor">
+  <div class="section-header">
+    <div class="section-number" style="background:#1a2035">M</div>
+    <div class="section-title">모델링 전체 흐름</div>
+  </div>
+  <p class="section-desc">코드에 참여하지 않은 팀원도 이해할 수 있도록, 각 단계의 목적과 이유를 함께 설명합니다.</p>
+</div>
+
+<div class="model-flow">
+  <div class="flow-box model1">
+    <div class="flow-label" style="color:#2a5fe0">Model 1</div>
+    <div class="flow-sub">전체 피처<br>XGBoost</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box feature-sel">
+    <div class="flow-label" style="color:#0f9b6e">Feature<br>Selection</div>
+    <div class="flow-sub">VIF + Importance<br>피처 정제</div>
+  </div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box model2">
+    <div class="flow-label" style="color:#6a3fc8">Model 2</div>
+    <div class="flow-sub">정제 피처<br>XGBoost</div>
+  </div>
+  <div class="flow-arrow">+</div>
+  <div class="flow-box th4">
+    <div class="flow-label" style="color:#d4700a">TH4 후처리</div>
+    <div class="flow-sub">소수 클래스<br>Recall 향상</div>
+  </div>
+</div>
+
+<!-- ── 클러스터링 ── -->
+<div id="clustering" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S1</div>
+    <div class="section-title">Step 1: 타겟 라벨 생성 — K-Means 클러스터링</div>
+  </div>
+</div>
+
+<div class="callout blue">
+  <div class="callout-icon">❓</div>
+  <div class="callout-body">
+    <strong>왜 클러스터링으로 타겟을 만드나?</strong>
+    premium_ratio는 연속형 숫자야. 그런데 우리 목표는 "이 신발이 프리미엄 등급 몇 단계냐?"를 맞추는 <strong>분류 문제</strong>야. 사전에 정해진 정답 등급이 없으니, 데이터 자체의 분포를 K-Means로 자동 분할해서 의미 있는 등급(낮음/보통/높음/...)을 만드는 거야.
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>항목</th><th>내용</th><th>이유</th></tr>
+  <tr><td>입력값</td><td>log1p(premium_ratio) — log 변환</td><td>음수 비율 처리 + 분포 정규화</td></tr>
+  <tr><td>K 탐색 범위</td><td>K = 2 ~ 6</td><td>너무 많으면 의미 없고, 너무 적으면 구분력 떨어져</td></tr>
+  <tr><td>K 선택 기준</td><td>Elbow Method + Silhouette Score 동시 확인</td><td>두 지표가 같은 K를 가리킬수록 신뢰도 높음</td></tr>
+  <tr><td>라벨 순서</td><td>평균 premium_ratio 기준 오름차순 재매핑 (0~4)</td><td>등급 번호가 실제 프리미엄 크기와 대응되도록</td></tr>
+  <tr><td>누수 방지</td><td>KMeans는 Train 데이터로만 fit → Test는 predict만</td><td>Test 라벨이 학습에 영향을 주지 않도록</td></tr>
+</table>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  Elbow Curve와 Silhouette 그래프를 <strong>나란히</strong> 보여주며 "왜 이 K를 선택했는가"를 설명하세요. 두 지표가 같은 K를 가리킬수록 설득력이 높습니다. 클러스터별 프리미엄 범위 박스플롯도 함께 보여주면 각 등급의 의미가 직관적으로 전달됩니다.
+</div>
+
+<!-- ── 데이터 분할 ── -->
+<div id="split" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S2</div>
+    <div class="section-title">Step 2: 데이터 분할 — 제품 단위 GroupSplit</div>
+  </div>
+</div>
+
+<div class="callout red">
+  <div class="callout-icon">⚠️</div>
+  <div class="callout-body">
+    <strong>왜 제품 단위로 분리하나? — 데이터 누수 방지</strong>
+    동일 제품의 여러 거래(다른 n일 값)가 train/test에 섞이면, 제품 고유 특성(release_price, color 등)이 test에 간접 노출됩니다. 이렇게 되면 모델이 "본 적 있는 제품"을 맞추는 게 돼서 성능이 과대평가됩니다.
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>항목</th><th>내용</th></tr>
+  <tr><td>분할 방식</td><td>GroupShuffleSplit(group=product_id)</td></tr>
+  <tr><td>비율</td><td>Train 약 96개 제품 (80%) / Test 약 24개 제품 (20%)</td></tr>
+  <tr><td>random_state 선택</td><td>발매가 구간별 비율이 가장 균등한 split 선택</td></tr>
+  <tr><td>교차검증</td><td>Train 내부에서 GroupKFold 5-fold로 하이퍼파라미터 튜닝</td></tr>
+</table>
+
+<!-- ── Model 1 ── -->
+<div id="model1" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S3</div>
+    <div class="section-title">Step 3: Model 1 — Baseline XGBoost</div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-icon">📖</div>
+  <div class="callout-body">
+    <strong>왜 XGBoost를 쓰나?</strong>
+    Kaggle 등 실전 데이터 경쟁에서 반복적으로 검증된 모델이야. 비선형 관계를 잘 잡고, 피처 중요도 추출이 쉬우며, 다중 분류(multi:softmax)를 기본 지원해.
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>하이퍼파라미터</th><th>값</th><th>설정 이유</th></tr>
+  <tr><td>n_estimators</td><td>500</td><td>과적합 없이 충분한 앙상블 크기 확보</td></tr>
+  <tr><td>learning_rate</td><td>0.05</td><td>낮은 학습률 + 높은 트리 수 조합으로 안정성 확보</td></tr>
+  <tr><td>objective</td><td>multi:softmax</td><td>다중 분류 전용 목적함수</td></tr>
+  <tr><td>eval_metric</td><td>mlogloss</td><td>다중 분류 손실 지표</td></tr>
+  <tr><td>sample_weight</td><td>balanced (역빈도 가중치)</td><td>소수 클래스(폭등) 학습 비중 보정</td></tr>
+</table>
+
+<div class="callout orange">
+  <div class="callout-icon">🤔</div>
+  <div class="callout-body">
+    <strong>SMOTE를 쓰지 않은 이유</strong>
+    SMOTE는 소수 클래스 샘플을 인공적으로 생성해 데이터를 늘리는 방법이야. 그런데 우리 데이터는 <strong>제품 단위 특성이 강해서</strong> 인공 샘플이 실제 존재할 수 없는 조합을 만들어낼 수 있어. 노이즈가 늘어나는 셈이야. 그래서 sample_weight로 학습 가중치를 조절하는 방법을 선택했어.
+  </div>
+</div>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  SMOTE를 쓰지 않은 이유를 발표에서 반드시 언급하세요. 단순히 몰라서가 아니라 <strong>데이터 특성을 고려한 판단</strong>임을 강조하면 평가단에게 좋은 인상을 줍니다.
+</div>
+
+<!-- ── TH4 ── -->
+<div id="th4" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S4</div>
+    <div class="section-title">Step 4: TH4 후처리 — 소수 클래스 Recall 향상</div>
+  </div>
+</div>
+
+<div class="callout red">
+  <div class="callout-icon">🔧</div>
+  <div class="callout-body">
+    <strong>왜 TH4 후처리가 필요한가?</strong>
+    class 4(폭등)는 데이터가 매우 적어, 모델이 기본 argmax로 예측하면 class 4를 거의 예측하지 않아. Recall이 극도로 낮아지는 거야. 그래서 "class 4의 확률이 TH4 이상이면 강제로 class 4로 예측"하는 후처리를 추가했어.
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>항목</th><th>내용</th></tr>
+  <tr><td>핵심 아이디어</td><td>P(class=4) ≥ TH4 이면 강제로 class 4 예측</td></tr>
+  <tr><td>TH4 결정 방법</td><td>Train 내부에서 별도 validation set 분리 후 자동 튜닝 (Test는 절대 참조 안 함)</td></tr>
+  <tr><td>Trade-off</td><td>Recall 상승 대신 Precision 일부 감소 가능</td></tr>
+  <tr><td>적용 모델</td><td>Model 1 + TH4 / Model 2 + TH4 모두에 동일한 TH4 값 적용</td></tr>
+</table>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  TH4 후처리의 효과를 Confusion Matrix <strong>Before/After</strong>로 나란히 비교하면 시각적으로 강한 임팩트를 줍니다. class 4 행(row)에서 Recall이 얼마나 올랐는지를 숫자로 강조하세요.
+</div>
+
+<!-- ── Feature Selection ── -->
+<div id="feature-sel" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S5</div>
+    <div class="section-title">Step 5: Feature Selection — VIF + Feature Importance</div>
+  </div>
+</div>
+
+<div class="callout purple">
+  <div class="callout-icon">🔍</div>
+  <div class="callout-body">
+    <strong>왜 Feature Selection을 하나?</strong>
+    피처가 많다고 모델이 좋아지지 않아. 노이즈 피처가 섞이면 오히려 모델이 중요한 신호를 놓칠 수 있어. 또 VIF가 높은 피처끼리는 같은 정보를 중복 제공하는 거라, 제거하면 모델이 실제로 중요한 신호에 집중할 수 있어.
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>방법</th><th>기준</th><th>역할</th></tr>
+  <tr><td>Feature Importance (Gain)</td><td>Model 1 학습 결과에서 추출</td><td>중요도 낮은 피처 제거 후보 선정</td></tr>
+  <tr><td>VIF (분산팽창지수)</td><td>VIF ≥ 10: 다중공선성 높음 → 제거</td><td>중복 정보 제거 — 높은 VIF 피처부터 순차 제거 후 반복</td></tr>
+</table>
+
+<div class="callout blue">
+  <div class="callout-icon">📐</div>
+  <div class="callout-body">
+    <strong>Gain 방식이란?</strong>
+    해당 피처가 분기(split)에 사용될 때 <strong>평균적으로 가져다주는 불순도 감소량</strong>이야. 이 값이 크다는 건, 그 피처로 데이터를 나눌 때 target이 잘 분리된다는 뜻이야. → 실제로 예측에 도움이 되는 피처라는 의미.
+  </div>
+</div>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  Feature Importance 바 차트를 Model 1 기준으로 먼저 보여주고, 어떤 피처가 살아남았는지 비교하세요. <code>days_since_release</code>, <code>adjusted_google_trend</code> 같이 직관적으로 이해되는 피처가 상위에 오면 설득력이 높아집니다.
+</div>
+
+<!-- ── Model 2 ── -->
+<div id="model2" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S6</div>
+    <div class="section-title">Step 6: Model 2 — Refined XGBoost</div>
+  </div>
+</div>
+
+<div class="callout green">
+  <div class="callout-icon">✅</div>
+  <div class="callout-body">
+    <strong>Model 2의 기대 효과</strong>
+    Feature Selection으로 선별된 피처만 사용하여 동일 하이퍼파라미터로 재학습해. 노이즈 피처를 제거했으니, 일반화 성능이 향상되고 모델 해석도 쉬워지는 게 기대야.
+  </div>
+</div>
+
+<!-- ── 4모델 비교 ── -->
+<div id="compare" class="anchor">
+  <div class="section-header">
+    <div class="section-number">S7</div>
+    <div class="section-title">Step 7: 4개 모델 최종 비교</div>
+  </div>
+</div>
+
+<div class="model-grid">
+  <div class="model-card m1">
+    <div class="model-badge badge-blue">Model 1</div>
+    <div class="model-card-title">Baseline XGBoost</div>
+    <div class="model-card-desc">전체 피처 사용. TH4 후처리 없음.<br><strong>역할:</strong> 비교 기준점(baseline). 여기서 무엇이 부족한지를 파악하는 게 목적.</div>
+  </div>
+  <div class="model-card m1th">
+    <div class="model-badge badge-orange">Model 1 + TH4</div>
+    <div class="model-card-title">Baseline + 임계값 후처리</div>
+    <div class="model-card-desc">전체 피처 사용 + TH4 후처리.<br><strong>역할:</strong> TH4 후처리만으로 소수 클래스 Recall이 얼마나 개선되는지 확인.</div>
+  </div>
+  <div class="model-card m2">
+    <div class="model-badge badge-purple">Model 2</div>
+    <div class="model-card-title">Refined XGBoost</div>
+    <div class="model-card-desc">정제 피처 사용. TH4 없음.<br><strong>역할:</strong> 피처 정제만의 효과 확인.</div>
+  </div>
+  <div class="model-card m2th">
+    <div class="model-badge badge-green">Model 2 + TH4 ⭐</div>
+    <div class="model-card-title">최종 최적 모델 (목표)</div>
+    <div class="model-card-desc">정제 피처 + TH4 후처리.<br><strong>역할:</strong> 피처 정제 + 소수 클래스 보정을 모두 적용한 최종 모델.</div>
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>평가 지표</th><th>의미</th><th>왜 중요한가</th></tr>
+  <tr><td>Accuracy</td><td>전체 정답률</td><td>기본 참고 지표이지만, 클래스 불균형 시 misleading할 수 있어</td></tr>
+  <tr><td><strong>F1-macro</strong></td><td>클래스별 F1의 단순 평균</td><td>불균형 데이터에서 핵심 — 소수 클래스도 동등하게 평가해</td></tr>
+  <tr><td>F1-weighted</td><td>클래스별 F1의 가중 평균</td><td>다수 클래스 비중을 반영한 지표</td></tr>
+  <tr><td>Recall-macro</td><td>클래스별 재현율 평균</td><td>class 4(폭등) 못 잡는 문제를 직접 포착</td></tr>
+</table>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  F1-macro를 중심으로 설명하면서 "왜 Accuracy만 보면 안 되는가"를 먼저 설명하세요. Confusion Matrix 4개를 나란히 놓고 class 4(폭등) 행이 얼마나 달라지는지 보여주면 강렬한 시각 효과를 만들 수 있습니다.
+</div>
+
+<!-- ── 한계점 ── -->
+<div id="limits" class="anchor">
+  <div class="section-header">
+    <div class="section-number" style="background:var(--red)">!</div>
+    <div class="section-title">한계점</div>
+  </div>
+</div>
+
+<div class="limit-list">
+  <div class="limit-item">
+    <div class="limit-num">1</div>
+    <div class="limit-text">
+      <strong>관심수 균등 증가 가정의 한계</strong>
+      <span>신발 리셀 특성상 발매 직후 관심이 폭증하고 이후 급감하는 패턴이 많아. 균등 증가 가정이 현실과 다르면 adjusted_wish가 오히려 노이즈로 작용할 수 있어.</span>
+    </div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-num">2</div>
+    <div class="limit-text">
+      <strong>외부 요인 미반영</strong>
+      <span>연예인 착용, 사회적 이슈 등 외부 관심도 요인은 현재 모델에 반영 불가야.</span>
+    </div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-num">3</div>
+    <div class="limit-text">
+      <strong>Google Trends "Nike" 단일 키워드 한계</strong>
+      <span>개별 신발의 정확한 관심도가 아니야. 또한 google_trend_pre는 수집 기간 한계로 최종 제외됐어.</span>
+    </div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-num">4</div>
+    <div class="limit-text">
+      <strong>Test 제품 수 부족 (24개)</strong>
+      <span>약 24개 제품(20%)으로 최종 평가하는 건 "본 적 없는 제품"에 대한 일반화 성능 평가의 신뢰구간이 넓어. 더 많은 제품 데이터가 필요해.</span>
+    </div>
+  </div>
+  <div class="limit-item">
+    <div class="limit-num">5</div>
+    <div class="limit-text">
+      <strong>Class 4(폭등) 데이터 불균형</strong>
+      <span>자연적으로 희귀한 클래스라 TH4로 보완하지만 근본적인 해결은 어려워. 더 많은 데이터가 필요해.</span>
+    </div>
+  </div>
+</div>
+
+<div class="present-point">
+  <div class="present-icon">📣</div>
+  한계점은 단순 나열보다 <strong>"우리가 이 한계를 인식하고 어떻게 보완했는가"</strong>를 함께 서술하세요. (VIF 제거, TH4 보정, GroupSplit 등) 한계를 알고 있다는 것 자체가 완성도를 높여 줍니다.
+</div>
+
+<!-- ── 발표 포인트 종합 ── -->
+<div id="present" class="anchor">
+  <div class="section-header">
+    <div class="section-number" style="background:#f0a000">★</div>
+    <div class="section-title">발표 포인트 종합</div>
+  </div>
+</div>
+
+<table class="compare-table">
+  <tr><th>슬라이드</th><th>핵심 포인트</th></tr>
+  <tr><td>Intro</td><td>"이 신발, 지금 사야 할까?" — 실생활 문제로 청중 공감 유도</td></tr>
+  <tr><td>파이프라인</td><td>복잡한 흐름을 Step 번호로 단순화. 9단계를 한 그림에</td></tr>
+  <tr><td>피처 설명</td><td>adjusted_wish, adjusted_google_trend 수식의 직관적 설명 필수</td></tr>
+  <tr><td>클러스터링</td><td>Elbow + Silhouette 나란히. 각 클래스의 프리미엄 범위를 박스플롯으로</td></tr>
+  <tr><td>Model 1 vs 2</td><td>Feature Importance 바 차트 → 살아남은 피처 비교</td></tr>
+  <tr><td>TH4 효과</td><td>Confusion Matrix Before/After — class 4 행의 변화를 강조</td></tr>
+  <tr><td>4모델 비교</td><td>F1-macro 중심 성능표. "왜 Accuracy만 보면 안 되는가" 먼저 설명</td></tr>
+  <tr><td>데모</td><td>실제 인기 신발로 "지금 사야 하는가?" 예측 결과 시연</td></tr>
+  <tr><td>한계점</td><td>한계 + 우리가 어떻게 보완했는지 함께 서술</td></tr>
+</table>
+
+<div style="text-align:center;padding:40px 20px 20px;color:var(--text-dim);font-size:0.8rem;border-top:1px solid var(--border);margin-top:48px">
+  KREAM 프리미엄 등급 예측 프로젝트 · 팀원 가이드 · 2026.02.24
+</div>
+
+</main>
+
+<script>
+// 스크롤에 따라 사이드바 active 업데이트
+const navItems = document.querySelectorAll('.nav-item');
+const sections = Array.from(navItems)
+  .map(item => {
+    const href = item.getAttribute('href');
+    if (!href || !href.startsWith('#')) return null;
+    const el = document.querySelector(href);
+    return el ? { nav: item, el } : null;
+  })
+  .filter(Boolean);
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 80;
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.el.offsetTop <= scrollY) current = s;
+  }
+  navItems.forEach(n => n.classList.remove('active'));
+  if (current) current.nav.classList.add('active');
+}, { passive: true });
+</script>
+
+</body>
+</html>

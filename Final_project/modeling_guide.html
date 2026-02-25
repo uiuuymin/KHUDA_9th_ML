@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KREAM 프리미엄 예측 모델링 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f2ec;
+    --cream: #ede9e0;
+    --accent: #e63946;
+    --accent2: #2563eb;
+    --accent3: #16a34a;
+    --gold: #d4a017;
+    --mid: #6b6b6b;
+    --border: rgba(255,255,255,0.08);
+    --card-bg: #141414;
+    --tag-bg: #1e1e1e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ──────────────── HERO ──────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 60px;
+    position: relative;
+    overflow: hidden;
+    background: var(--black);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(230,57,70,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 9vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: #aaa;
+    max-width: 560px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+    line-height: 1.8;
+  }
+
+  .hero-tags {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .tag {
+    padding: 8px 18px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #ccc;
+    background: var(--tag-bg);
+  }
+
+  .tag.red { border-color: var(--accent); color: var(--accent); }
+  .tag.blue { border-color: var(--accent2); color: var(--accent2); }
+  .tag.green { border-color: var(--accent3); color: var(--accent3); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 48px;
+    left: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.2s forwards;
+  }
+
+  .scroll-line {
+    width: 60px;
+    height: 1px;
+    background: var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: white;
+    animation: slideLine 2s ease-in-out infinite;
+  }
+
+  @keyframes slideLine { 0%{left:-100%} 100%{left:100%} }
+
+  .scroll-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+  }
+
+  /* ──────────────── NAV ──────────────── */
+  .sidenav {
+    position: fixed;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sidenav a {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: block;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .sidenav a:hover,
+  .sidenav a.active {
+    background: var(--accent);
+    transform: scale(1.5);
+  }
+
+  .sidenav a::before {
+    content: attr(data-label);
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    white-space: nowrap;
+    color: var(--white);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .sidenav a:hover::before { opacity: 1; }
+
+  /* ──────────────── SECTION BASE ──────────────── */
+  .section {
+    padding: 120px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-sep {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 0 60px;
+    max-width: calc(100% - 120px);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+
+  .section-lead {
+    font-size: 16px;
+    color: #999;
+    max-width: 640px;
+    margin-bottom: 64px;
+    line-height: 1.85;
+  }
+
+  /* ──────────────── PIPELINE ──────────────── */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 80px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .pipe-step {
+    flex: 1;
+    min-width: 160px;
+    padding: 28px 24px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .pipe-step:hover { border-color: var(--accent); transform: translateY(-4px); }
+
+  .pipe-step::after {
+    content: '→';
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mid);
+    font-size: 20px;
+    z-index: 1;
+  }
+
+  .pipe-step:last-child::after { display: none; }
+
+  .pipe-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: rgba(230,57,70,0.2);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .pipe-label {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .pipe-sub {
+    font-size: 11px;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+
+  /* ──────────────── CONCEPT CARD ──────────────── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .concept-card {
+    background: var(--card-bg);
+    padding: 40px;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .concept-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .concept-card:hover { border-left-color: var(--accent); }
+
+  .concept-card.blue:hover { border-left-color: var(--accent2); }
+
+  .concept-icon {
+    font-size: 32px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .concept-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .concept-body {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  .concept-code {
+    margin-top: 16px;
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: #7dd3a8;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  /* ──────────────── WHY BOX ──────────────── */
+  .why-box {
+    background: linear-gradient(135deg, rgba(230,57,70,0.08) 0%, rgba(230,57,70,0.02) 100%);
+    border: 1px solid rgba(230,57,70,0.2);
+    border-radius: 2px;
+    padding: 32px 40px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .why-box::before {
+    content: 'WHY';
+    position: absolute;
+    top: 20px; right: 32px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(230,57,70,0.06);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .why-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .why-body {
+    font-size: 15px;
+    line-height: 1.9;
+    color: #ccc;
+  }
+
+  .why-body strong { color: var(--white); }
+
+  /* ──────────────── VIZ: DISTRIBUTION ──────────────── */
+  .viz-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 40px;
+    margin-bottom: 32px;
+  }
+
+  .viz-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  /* 프리미엄 분포 막대 시각화 */
+  .dist-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 120px;
+    margin-bottom: 12px;
+  }
+
+  .dist-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .dist-bar:hover { opacity: 0.8; }
+
+  .dist-bar-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+    position: absolute;
+    bottom: -20px;
+    white-space: nowrap;
+  }
+
+  /* K-means 클러스터 시각화 */
+  .cluster-viz {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .cluster-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .cluster-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .cluster-bar-wrap {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .cluster-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(0,0,0,0.7);
+    font-weight: 700;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0;
+  }
+
+  .cluster-info {
+    width: 200px;
+    font-size: 11px;
+    color: var(--mid);
+    flex-shrink: 0;
+  }
+
+  /* ──────────────── STRATEGY TABLE ──────────────── */
+  .strat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 48px;
+  }
+
+  .strat-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--mid);
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: var(--card-bg);
+  }
+
+  .strat-table td {
+    padding: 16px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  .strat-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .badge-red { background: rgba(230,57,70,0.15); color: var(--accent); }
+  .badge-blue { background: rgba(37,99,235,0.15); color: #60a5fa; }
+  .badge-green { background: rgba(22,163,74,0.15); color: #4ade80; }
+  .badge-gold { background: rgba(212,160,23,0.15); color: var(--gold); }
+
+  /* ──────────────── MODEL COMPARE ──────────────── */
+  .model-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .model-card {
+    background: var(--card-bg);
+    padding: 40px;
+    border-top: 3px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .model-card.m1 { border-top-color: var(--accent2); }
+  .model-card.m2 { border-top-color: var(--accent); }
+
+  .model-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    margin-bottom: 16px;
+  }
+
+  .model-label.m1 { color: var(--accent2); }
+  .model-label.m2 { color: var(--accent); }
+
+  .model-name {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .model-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .model-features li {
+    font-size: 13px;
+    color: #aaa;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .model-features li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--mid);
+    font-family: monospace;
+  }
+
+  /* ──────────────── METRICS VIZ ──────────────── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .metric-card {
+    background: var(--card-bg);
+    padding: 32px 28px;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .metric-card:hover { border-bottom-color: var(--accent); }
+
+  .metric-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .metric-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .metric-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  /* ──────────────── TH4 VIZ ──────────────── */
+  .th4-viz {
+    background: var(--card-bg);
+    padding: 40px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .th4-scale {
+    position: relative;
+    height: 60px;
+    background: linear-gradient(to right, #1e293b, #1e293b 30%, rgba(230,57,70,0.3) 60%, rgba(230,57,70,0.7) 100%);
+    border-radius: 2px;
+    margin: 24px 0;
+  }
+
+  .th4-marker {
+    position: absolute;
+    top: -10px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .th4-marker-line {
+    width: 2px;
+    height: 80px;
+    background: white;
+  }
+
+  .th4-marker-label {
+    background: white;
+    color: black;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 8px;
+    font-weight: 700;
+  }
+
+  .th4-axis {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    padding: 0 4px;
+  }
+
+  /* ──────────────── CONFUSION MATRIX ──────────────── */
+  .cm-wrap {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 48px;
+    align-items: flex-start;
+  }
+
+  .cm-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 52px);
+    gap: 3px;
+  }
+
+  .cm-cell {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .cm-cell:hover { transform: scale(1.1); z-index: 10; }
+
+  .cm-header {
+    background: transparent !important;
+    color: var(--mid);
+    font-size: 11px;
+  }
+
+  .cm-diag { background: rgba(37,99,235,0.6); color: white; font-weight: 700; }
+  .cm-high { background: rgba(230,57,70,0.4); color: white; }
+  .cm-med { background: rgba(230,57,70,0.15); color: #ddd; }
+  .cm-low { background: rgba(255,255,255,0.04); color: var(--mid); }
+
+  .cm-legend {
+    flex: 1;
+    padding-top: 52px;
+  }
+
+  .cm-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #aaa;
+  }
+
+  .cm-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ──────────────── FEATURE IMPORTANCE ──────────────── */
+  .fi-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .fi-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .fi-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    width: 220px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .fi-bar-wrap {
+    flex: 1;
+    height: 24px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .fi-bar-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(0,0,0,0.6);
+    font-weight: 700;
+  }
+
+  /* ──────────────── POINT CARDS ──────────────── */
+  .points-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .point-card {
+    background: var(--card-bg);
+    padding: 40px 32px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .point-card::after {
+    content: attr(data-num);
+    position: absolute;
+    bottom: -10px;
+    right: 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .point-card:hover { border-bottom-color: var(--gold); }
+
+  .point-cat {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .point-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .point-body {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.75;
+  }
+
+  .point-qa {
+    margin-top: 16px;
+    padding: 14px;
+    background: rgba(212,160,23,0.06);
+    border-left: 2px solid var(--gold);
+  }
+
+  .point-qa-q {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .point-qa-a {
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.65;
+  }
+
+  /* ──────────────── STEP DETAIL ──────────────── */
+  .step-detail {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .step-sidebar {
+    background: var(--card-bg);
+    padding: 40px 32px;
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .step-main {
+    background: var(--card-bg);
+    padding: 40px;
+  }
+
+  .step-sidebar-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(230,57,70,0.15);
+    line-height: 0.9;
+    margin-bottom: 20px;
+  }
+
+  .step-sidebar-title {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .step-sidebar-desc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.75;
+  }
+
+  .step-main-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .step-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .step-bullets li {
+    font-size: 14px;
+    color: #ccc;
+    padding-left: 24px;
+    position: relative;
+    line-height: 1.7;
+  }
+
+  .step-bullets li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .step-bullets li strong { color: var(--white); }
+
+  /* ──────────────── QUOTE ──────────────── */
+  .insight-box {
+    border-left: 4px solid var(--accent);
+    padding: 24px 32px;
+    margin: 32px 0;
+    background: rgba(230,57,70,0.04);
+  }
+
+  .insight-text {
+    font-size: 16px;
+    color: var(--white);
+    line-height: 1.8;
+    font-style: italic;
+  }
+
+  .insight-source {
+    margin-top: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--mid);
+    letter-spacing: 0.15em;
+  }
+
+  /* ──────────────── CODE BLOCK ──────────────── */
+  pre.code-block {
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 28px 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 2px;
+    color: #c8d3f5;
+  }
+
+  pre.code-block .kw { color: #c099ff; }
+  pre.code-block .fn { color: #82aaff; }
+  pre.code-block .str { color: #c3e88d; }
+  pre.code-block .num { color: #ff995e; }
+  pre.code-block .cmt { color: #444; }
+
+  /* ──────────────── FOOTER ──────────────── */
+  .footer {
+    padding: 60px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-left {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: 0.1em;
+  }
+
+  .footer-right {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mid);
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  /* ──────────────── ANIMATIONS ──────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ──────────────── TOOLTIP ──────────────── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-text {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    color: var(--black);
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 2px;
+    z-index: 100;
+  }
+  .tooltip-wrap:hover .tooltip-text { opacity: 1; }
+
+  /* ──────────────── RESPONSIVE ──────────────── */
+  @media (max-width: 900px) {
+    .hero, .section { padding: 80px 24px; }
+    .concept-grid, .model-compare { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .points-grid { grid-template-columns: 1fr; }
+    .step-detail { grid-template-columns: 1fr; }
+    .sidenav { display: none; }
+    .cm-wrap { flex-direction: column; }
+    .section-sep { margin: 0 24px; max-width: calc(100% - 48px); }
+    .fi-name { width: 140px; font-size: 10px; }
+    .footer { flex-direction: column; gap: 20px; text-align: center; padding: 40px 24px; }
+    .pipeline { gap: 0; }
+    .pipe-step { min-width: 120px; padding: 20px 16px; }
+    .pipe-step::after { right: -12px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDE NAV -->
+<nav class="sidenav">
+  <a href="#overview" data-label="개요"></a>
+  <a href="#step1" data-label="Step 1: KMeans"></a>
+  <a href="#step2" data-label="Step 2: 데이터 분리"></a>
+  <a href="#step3" data-label="Step 3: 모델 학습"></a>
+  <a href="#step4" data-label="Step 4: TH4"></a>
+  <a href="#step5" data-label="Step 5: 피처 선택"></a>
+  <a href="#results" data-label="결과 비교"></a>
+  <a href="#points" data-label="발표 포인트"></a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="overview">
+  <div class="hero-eyebrow">KREAM 스니커즈 프리미엄 예측 프로젝트</div>
+  <h1 class="hero-title">MODELING<br><span>GUIDE</span></h1>
+  <p class="hero-sub">
+    코드에 처음 합류한 팀원도 이해할 수 있도록 전체 모델링 파이프라인의 <strong style="color:var(--white)">이유·의미·흐름</strong>을 한눈에 정리합니다.
+  </p>
+  <div class="hero-tags">
+    <span class="tag red">KMeans Clustering</span>
+    <span class="tag blue">XGBoost Classifier</span>
+    <span class="tag green">GroupShuffleSplit</span>
+    <span class="tag">VIF Feature Selection</span>
+    <span class="tag">TH4 Post-processing</span>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll to explore</span>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── 전체 흐름 ──────────────── -->
+<section class="section fade-in">
+  <span class="section-num">00 — OVERVIEW</span>
+  <h2 class="section-title">전체 파이프라인</h2>
+  <p class="section-lead">이 프로젝트는 크게 5단계로 구성됩니다. 각 단계는 앞 단계의 결과물을 이어받아 최종 예측 모델을 완성합니다.</p>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num">01</div>
+      <div class="pipe-label">K 최적화</div>
+      <div class="pipe-sub">KMeans로<br>타겟 라벨 생성</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">02</div>
+      <div class="pipe-label">데이터 분리</div>
+      <div class="pipe-sub">제품 단위<br>Train/Test Split</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">03</div>
+      <div class="pipe-label">Model 1</div>
+      <div class="pipe-sub">전체 피처<br>XGBoost 학습</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">04</div>
+      <div class="pipe-label">TH4 튜닝</div>
+      <div class="pipe-sub">희귀 클래스<br>후처리 보정</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">05</div>
+      <div class="pipe-label">Model 2</div>
+      <div class="pipe-sub">VIF 피처 선택<br>재학습</div>
+    </div>
+  </div>
+
+  <div class="why-box fade-in">
+    <div class="why-title">이 프로젝트의 핵심 아이디어</div>
+    <p class="why-body">
+      KREAM의 거래 데이터에는 <strong>명시적인 프리미엄 등급 라벨이 없습니다.</strong> 그래서 직접 만들어야 합니다.<br><br>
+      먼저 <strong>비지도 학습(KMeans)</strong>으로 프리미엄 비율 분포를 자동으로 5개 구간으로 쪼갭니다.<br>
+      그 라벨을 타겟으로 삼아 <strong>지도 학습(XGBoost)</strong>으로 미래 거래에도 적용 가능한 분류기를 만드는 것이 핵심입니다.
+    </p>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── STEP 1: KMEANS ──────────────── -->
+<section class="section" id="step1">
+  <span class="section-num">01 — K-MEANS CLUSTERING</span>
+  <h2 class="section-title fade-in">타겟 라벨을<br>만드는 이유</h2>
+  <p class="section-lead fade-in">
+    프리미엄 비율(premium_ratio)은 연속형 숫자입니다. 이것을 분류 문제로 바꾸려면 "몇 등급"인지 라벨이 필요합니다.
+  </p>
+
+  <div class="concept-grid fade-in">
+    <div class="concept-card">
+      <span class="concept-icon">🤔</span>
+      <div class="concept-title">왜 KMeans인가?</div>
+      <div class="concept-body">
+        premium_ratio 분포를 보면 자연스럽게 여러 덩어리(cluster)가 형성됩니다. KMeans는 이 덩어리를 수학적으로 찾아줍니다. 사람이 임의로 "0~20%는 낮음" 같이 경계를 정하면 주관이 개입되지만, KMeans는 데이터 자체의 패턴을 따릅니다.
+      </div>
+      <div class="concept-code">premium_ratio → log 변환 → StandardScaler → KMeans(K=5)</div>
+    </div>
+    <div class="concept-card blue">
+      <span class="concept-icon">📐</span>
+      <div class="concept-title">왜 log 변환을 하나?</div>
+      <div class="concept-body">
+        premium_ratio는 오른쪽으로 긴 꼬리(right-skewed) 분포를 가집니다. 극단적인 폭등 거래가 소수 있어서, 그대로 쓰면 KMeans가 이상치에 끌려갑니다. log1p 변환으로 분포를 정규화해 클러스터가 더 균형 있게 나뉩니다.
+      </div>
+      <div class="concept-code">np.log1p(premium_ratio.clip(lower=-0.99))</div>
+    </div>
+  </div>
+
+  <div class="viz-card fade-in">
+    <div class="viz-title">최적 K 탐색: Elbow + Silhouette</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start">
+      <div>
+        <div style="font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.7">
+          두 지표를 함께 사용한 이유:<br>
+          <span style="color:var(--accent2)">Elbow</span>는 언제 성능 향상이 줄어드는지를,<br>
+          <span style="color:var(--accent)">Silhouette</span>는 클러스터가 실제로 잘 나뉘는지를 측정합니다.
+        </div>
+        <!-- Elbow Simulation -->
+        <div style="position:relative;height:160px;margin-bottom:12px">
+          <svg viewBox="0 0 300 160" style="width:100%;height:100%">
+            <polyline points="20,140 80,90 140,60 200,48 260,42" fill="none" stroke="rgba(37,99,235,0.5)" stroke-width="2" stroke-dasharray="4,2"/>
+            <polyline points="20,140 80,90 140,60 200,48 260,42" fill="none" stroke="#2563eb" stroke-width="2"/>
+            <circle cx="20" cy="140" r="4" fill="#2563eb"/>
+            <circle cx="80" cy="90" r="4" fill="#2563eb"/>
+            <circle cx="140" cy="60" r="6" fill="white" stroke="#2563eb" stroke-width="2"/>
+            <circle cx="200" cy="48" r="4" fill="#2563eb"/>
+            <circle cx="260" cy="42" r="4" fill="#2563eb"/>
+            <text x="20" y="155" fill="#666" font-family="monospace" font-size="9">K=2</text>
+            <text x="77" y="155" fill="#666" font-family="monospace" font-size="9">K=3</text>
+            <text x="134" y="155" fill="#e63946" font-family="monospace" font-size="9" font-weight="bold">K=4</text>
+            <text x="194" y="155" fill="#666" font-family="monospace" font-size="9">K=5</text>
+            <text x="254" y="155" fill="#666" font-family="monospace" font-size="9">K=6</text>
+            <text x="5" y="15" fill="#2563eb" font-family="monospace" font-size="8">Inertia</text>
+            <line x1="140" y1="10" x2="140" y2="140" stroke="rgba(230,57,70,0.3)" stroke-width="1" stroke-dasharray="4,2"/>
+            <text x="145" y="30" fill="rgba(230,57,70,0.7)" font-family="monospace" font-size="8">Elbow!</text>
+          </svg>
+        </div>
+        <div style="font-size:11px;color:var(--mid);font-family:monospace">▲ Elbow: K=4 이후 감소폭이 급격히 줄어듦</div>
+      </div>
+      <div>
+        <!-- K 선택 근거 표 -->
+        <div style="font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.7">
+          K=5를 최종 선택한 이유:
+        </div>
+        <table class="strat-table" style="margin-bottom:0">
+          <thead>
+            <tr>
+              <th>K값</th>
+              <th>Silhouette</th>
+              <th>판단</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2</td><td>0.61</td><td><span class="badge badge-red">너무 단순</span></td></tr>
+            <tr><td>3</td><td>0.57</td><td><span class="badge badge-blue">보통</span></td></tr>
+            <tr><td>4</td><td>0.53</td><td><span class="badge badge-blue">Elbow</span></td></tr>
+            <tr><td style="color:var(--white);font-weight:700">5</td><td style="color:var(--white)">0.51</td><td><span class="badge badge-green">✓ 최종 선택</span></td></tr>
+            <tr><td>6</td><td>0.47</td><td><span class="badge badge-red">과분할</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;font-size:12px;color:#777;line-height:1.65">
+          Silhouette만 보면 K=2가 높지만, 비즈니스 해석 가능성(5개 프리미엄 구간)과 종합 판단해 K=5 선택
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 클러스터 결과 -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">클러스터별 의미 (라벨 0→4: 낮은→높은 프리미엄)</div>
+    <div class="cluster-viz" id="clusterViz">
+      <div class="cluster-row">
+        <div class="cluster-label">Label 0</div>
+        <div class="cluster-bar-wrap">
+          <div class="cluster-bar-fill" data-width="72" style="background:linear-gradient(to right,#1e40af,#2563eb)">📉 하락/저프리미엄</div>
+        </div>
+        <div class="cluster-info">premium_ratio ≈ -5% ~ 5% / 구매 보류 추천</div>
+      </div>
+      <div class="cluster-row">
+        <div class="cluster-label">Label 1</div>
+        <div class="cluster-bar-wrap">
+          <div class="cluster-bar-fill" data-width="85" style="background:linear-gradient(to right,#0369a1,#0ea5e9)">➖ 안정/보합</div>
+        </div>
+        <div class="cluster-info">premium_ratio ≈ 5% ~ 20% / 큰 변동 없음</div>
+      </div>
+      <div class="cluster-row">
+        <div class="cluster-label">Label 2</div>
+        <div class="cluster-bar-wrap">
+          <div class="cluster-bar-fill" data-width="60" style="background:linear-gradient(to right,#065f46,#16a34a)">📈 완만한 상승</div>
+        </div>
+        <div class="cluster-info">premium_ratio ≈ 20% ~ 50% / 보통 수요</div>
+      </div>
+      <div class="cluster-row">
+        <div class="cluster-label">Label 3</div>
+        <div class="cluster-bar-wrap">
+          <div class="cluster-bar-fill" data-width="40" style="background:linear-gradient(to right,#92400e,#d97706)">🚀 급상승 예상</div>
+        </div>
+        <div class="cluster-info">premium_ratio ≈ 50% ~ 150% / 인기 급증</div>
+      </div>
+      <div class="cluster-row">
+        <div class="cluster-label">Label 4</div>
+        <div class="cluster-bar-wrap">
+          <div class="cluster-bar-fill" data-width="15" style="background:linear-gradient(to right,#7f1d1d,#e63946)">🔥 폭등 (희귀)</div>
+        </div>
+        <div class="cluster-info">premium_ratio ≈ 150%+ / 극소수, 선점 필수</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--mid);margin-top:8px;font-family:monospace">※ 막대 길이 = 해당 클러스터 데이터 비율 (Label 4가 가장 희귀)</div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── STEP 2: DATA SPLIT ──────────────── -->
+<section class="section" id="step2">
+  <span class="section-num">02 — DATA SPLIT STRATEGY</span>
+  <h2 class="section-title fade-in">왜 일반 random split을<br>쓰지 않나?</h2>
+  <p class="section-lead fade-in">
+    데이터 누수(Data Leakage)를 막는 것이 이 프로젝트에서 가장 중요한 설계 결정입니다.
+  </p>
+
+  <div class="step-detail fade-in">
+    <div class="step-sidebar">
+      <div class="step-sidebar-num">02</div>
+      <div class="step-sidebar-title">GroupShuffleSplit</div>
+      <div class="step-sidebar-desc">
+        같은 상품(product_id)의 거래 기록이 train과 test에 동시에 들어가면, 모델이 "이 신발의 과거 패턴"을 외워버립니다. 실제 서비스에서는 새 상품에 대한 예측이 필요하므로 반드시 제품 단위로 분리합니다.
+      </div>
+    </div>
+    <div class="step-main">
+      <div class="step-main-label">3가지 누수 방지 장치</div>
+      <ul class="step-bullets">
+        <li>
+          <strong>GroupShuffleSplit(group=product_id)</strong> — 동일 제품이 train/test에 걸치지 않도록 제품 단위 분리
+        </li>
+        <li>
+          <strong>KMeans는 train으로만 fit</strong> — test에는 predict만 적용. train의 클러스터 경계가 test에 "새나가지" 않음
+        </li>
+        <li>
+          <strong>라벨 순서 매핑도 train 기준 고정</strong> — "낮음=0, 높음=4" 정의가 train에서 한 번만 결정되고 test에 그대로 적용
+        </li>
+        <li>
+          <strong>TH4 튜닝도 train 내부 val에서만</strong> — test를 한 번도 보지 않은 상태에서 TH4 결정
+        </li>
+      </ul>
+      <div class="concept-code" style="margin-top:24px">
+gss = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+train_idx, test_idx = next(gss.split(df, groups=product_id))
+
+# KMeans: train만 fit
+kmeans.fit_predict(train_scaled)   ← ✅
+kmeans.predict(test_scaled)        ← ✅
+kmeans.fit_predict(all_data)       ← ❌ 누수 발생!</div>
+    </div>
+  </div>
+
+  <div class="why-box fade-in">
+    <div class="why-title">쉬운 비유</div>
+    <p class="why-body">
+      시험을 앞두고 공부할 때, <strong>시험지를 미리 보고 공부하면 안 됩니다.</strong> 일반 random split은 마치 시험지를 뒤섞어서 일부를 공부 자료에 넣는 것과 같습니다. GroupShuffleSplit은 "이 선생님이 낸 문제 스타일은 배웠지만, 이 특정 시험지는 처음 봤다"는 상황을 만들어줍니다.
+    </p>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── STEP 3: MODEL ──────────────── -->
+<section class="section" id="step3">
+  <span class="section-num">03 — MODEL TRAINING</span>
+  <h2 class="section-title fade-in">XGBoost를<br>선택한 이유</h2>
+  <p class="section-lead fade-in">
+    두 개의 XGBoost 모델을 순차적으로 만들고 비교합니다.
+  </p>
+
+  <div class="model-compare fade-in">
+    <div class="model-card m1">
+      <div class="model-label m1">MODEL 1 — BASELINE</div>
+      <div class="model-name">전체 피처 사용</div>
+      <ul class="model-features">
+        <li>log_release_price, is_collaboration, size, golden_size</li>
+        <li>log_google_trend_release/n_day, trend_retention</li>
+        <li>rolling_price_std, trade_velocity, days_since_release</li>
+        <li>recent_avg_premium_5</li>
+        <li>color_* (원핫 11개)</li>
+      </ul>
+      <div style="margin-top:20px;padding:14px;background:rgba(37,99,235,0.06);border-left:2px solid var(--accent2)">
+        <div style="font-size:12px;color:#aaa;line-height:1.7">역할: 기준점(Baseline). "피처를 다 넣었을 때"의 성능을 측정해서 이후 개선의 기준이 됩니다.</div>
+      </div>
+    </div>
+    <div class="model-card m2">
+      <div class="model-label m2">MODEL 2 — REFINED</div>
+      <div class="model-name">선택된 핵심 피처만 사용</div>
+      <ul class="model-features">
+        <li>VIF &lt; 10인 non-color 피처 최대 12개</li>
+        <li>Feature Importance(Gain) 기준 중요도 순 선택</li>
+        <li>color_* 전체 포함 (원핫 특성상 VIF 불적용)</li>
+        <li>다중공선성 높은 피처 자동 제거</li>
+      </ul>
+      <div style="margin-top:20px;padding:14px;background:rgba(230,57,70,0.06);border-left:2px solid var(--accent)">
+        <div style="font-size:12px;color:#aaa;line-height:1.7">역할: 노이즈 제거. "꼭 필요한 피처만 써도 비슷하거나 더 좋은가?"를 검증합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viz-card fade-in">
+    <div class="viz-title">XGBoost를 선택한 이유</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div>
+        <div style="font-size:20px;margin-bottom:12px">🌲</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px">앙상블 학습</div>
+        <div style="font-size:13px;color:#888;line-height:1.7">여러 결정 트리를 순차적으로 만들어 이전 실수를 다음 트리가 보완. 단일 트리보다 훨씬 강력</div>
+      </div>
+      <div>
+        <div style="font-size:20px;margin-bottom:12px">⚖️</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px">sample_weight 지원</div>
+        <div style="font-size:13px;color:#888;line-height:1.7">클래스 불균형 대응 가능. class 4(폭등)처럼 데이터 적은 클래스에 더 높은 가중치 부여</div>
+      </div>
+      <div>
+        <div style="font-size:20px;margin-bottom:12px">📊</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px">Feature Importance</div>
+        <div style="font-size:13px;color:#888;line-height:1.7">어떤 피처가 예측에 얼마나 기여했는지 Gain/Weight 두 가지 방식으로 해석 가능</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viz-card fade-in">
+    <div class="viz-title">클래스 불균형 보정: compute_class_weight('balanced')</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+      <div>
+        <div style="font-size:14px;color:#ccc;line-height:1.8;margin-bottom:16px">
+          Label 4는 전체 데이터의 2~3%에 불과합니다. 가중치 없이 학습하면 모델은 Label 4를 거의 예측하지 않습니다 (다수 클래스 예측이 "손실"이 낮으므로).
+        </div>
+        <div class="concept-code" style="font-size:11px">
+<span class="cmt"># 가중치 공식</span>
+w_class = 총 샘플 수 / (클래스 수 × 클래스 샘플 수)
+
+<span class="cmt"># Label 4 가중치 ≈ 전체/(5×소수) → 높은 값</span>
+<span class="cmt"># Label 1 가중치 ≈ 전체/(5×다수) → 낮은 값</span></div>
+      </div>
+      <div>
+        <!-- 클래스별 가중치 시각화 -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:monospace;font-size:11px;color:var(--mid);width:60px">Label 0</span>
+            <div style="flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">
+              <div style="width:35%;height:100%;background:rgba(37,99,235,0.5);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:monospace">0.65</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:monospace;font-size:11px;color:var(--mid);width:60px">Label 1</span>
+            <div style="flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">
+              <div style="width:28%;height:100%;background:rgba(37,99,235,0.5);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:monospace">0.52</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:monospace;font-size:11px;color:var(--mid);width:60px">Label 2</span>
+            <div style="flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">
+              <div style="width:45%;height:100%;background:rgba(22,163,74,0.5);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:monospace">0.83</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:monospace;font-size:11px;color:var(--mid);width:60px">Label 3</span>
+            <div style="flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">
+              <div style="width:60%;height:100%;background:rgba(212,160,23,0.5);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:monospace">1.12</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:monospace;font-size:11px;color:var(--mid);width:60px">Label 4</span>
+            <div style="flex:1;height:20px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">
+              <div style="width:100%;height:100%;background:linear-gradient(to right,rgba(230,57,70,0.6),rgba(230,57,70,0.9));display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;font-family:monospace;color:white">4.80+</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--mid);margin-top:10px;font-family:monospace">▲ Label 4가 가장 높은 가중치 → 모델이 Label 4를 놓치면 더 큰 페널티</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Importance Chart -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">Feature Importance (Gain 기준, 개념적 예시)</div>
+    <div class="fi-chart" id="fiChart">
+      <div class="fi-row">
+        <div class="fi-name">recent_avg_premium_5</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="91" style="background:linear-gradient(to right,#7c3aed,#a855f7)">91%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">days_since_release</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="78" style="background:linear-gradient(to right,#1d4ed8,#3b82f6)">78%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">rolling_price_std</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="64" style="background:linear-gradient(to right,#0e7490,#22d3ee)">64%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">log_release_price</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="55" style="background:linear-gradient(to right,#065f46,#34d399)">55%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">trend_retention</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="48" style="background:linear-gradient(to right,#92400e,#fbbf24)">48%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">trade_velocity</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="37" style="background:linear-gradient(to right,#7f1d1d,#f87171)">37%</div>
+        </div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-name">log_google_trend</div>
+        <div class="fi-bar-wrap">
+          <div class="fi-bar-fill" data-width="28" style="background:linear-gradient(to right,#6b21a8,#c084fc)">28%</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--mid);font-family:monospace">※ 개념적 예시 차트. 실제 값은 학습된 모델에서 확인</div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── STEP 4: TH4 ──────────────── -->
+<section class="section" id="step4">
+  <span class="section-num">04 — TH4 POST-PROCESSING</span>
+  <h2 class="section-title fade-in">소수 클래스를<br>더 잘 잡는 방법</h2>
+  <p class="section-lead fade-in">
+    Label 4(폭등)는 데이터가 극히 적어 기본 예측에서 Recall이 낮습니다. TH4 후처리로 이를 보완합니다.
+  </p>
+
+  <div class="why-box fade-in">
+    <div class="why-title">TH4 아이디어</div>
+    <p class="why-body">
+      XGBoost는 예측 시 각 클래스에 대한 확률값을 반환합니다. 기본적으로 가장 높은 확률의 클래스를 예측(argmax)하지만,<br><br>
+      <strong>"Label 4일 확률이 TH4% 이상이면, 다른 클래스 확률이 더 높더라도 Label 4로 예측"</strong><br><br>
+      이렇게 하면 Label 4를 더 많이 잡을 수 있습니다. 단, 일부 오분류도 늘어나므로 <strong>Precision과 Recall의 Trade-off</strong>가 발생합니다.
+    </p>
+  </div>
+
+  <div class="th4-viz fade-in">
+    <div class="viz-title">TH4 작동 원리 — 임계값 위치에 따른 예측 변화</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+      <div>
+        <div style="font-size:13px;color:#aaa;line-height:1.8;margin-bottom:20px">
+          TH4를 낮게 설정하면: Label 4 Recall ↑, Precision ↓<br>
+          TH4를 높게 설정하면: Label 4 Recall ↓, Precision ↑
+        </div>
+        <div class="th4-scale" style="position:relative;height:50px;background:linear-gradient(to right,#1e293b 0%,rgba(230,57,70,0.15) 40%,rgba(230,57,70,0.5) 70%,rgba(230,57,70,0.85) 100%);border-radius:2px;margin-bottom:8px">
+          <div style="position:absolute;left:30%;top:-8px;display:flex;flex-direction:column;align-items:center">
+            <div style="background:white;color:black;font-family:monospace;font-size:9px;padding:2px 6px;font-weight:700">TH4=0.10</div>
+            <div style="width:2px;height:66px;background:white;opacity:0.6"></div>
+          </div>
+          <div style="position:absolute;left:55%;top:-8px;display:flex;flex-direction:column;align-items:center">
+            <div style="background:var(--accent);color:white;font-family:monospace;font-size:9px;padding:2px 6px;font-weight:700">최적 TH4</div>
+            <div style="width:2px;height:66px;background:var(--accent)"></div>
+          </div>
+        </div>
+        <div class="th4-axis">
+          <span>P(label=4) = 0.05</span>
+          <span>0.25</span>
+          <span>0.50</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:#aaa;margin-bottom:16px">TH4 튜닝이 테스트셋 누수가 아닌 이유</div>
+        <ul class="step-bullets">
+          <li>TH4 탐색은 <strong>train 내부 val</strong>에서만 수행</li>
+          <li>val도 <strong>GroupShuffleSplit</strong>으로 제품 단위 분리</li>
+          <li>test는 TH4 결정 과정에서 <strong>한 번도 참조되지 않음</strong></li>
+          <li>결정된 TH4를 test에 적용 → 공정한 최종 평가</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade-off 시각화 -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">TH4 적용 전후 Label 4 성능 변화 (개념적)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+      <div>
+        <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:12px">TH4 적용 전 (argmax)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>Precision</span><span>0.82</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:82%;height:100%;background:rgba(37,99,235,0.6)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>Recall</span><span style="color:var(--accent)">0.24</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:24%;height:100%;background:rgba(230,57,70,0.6)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>F1</span><span>0.37</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:37%;height:100%;background:rgba(168,85,247,0.6)"></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:12px">TH4 적용 후</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>Precision</span><span>0.64</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:64%;height:100%;background:rgba(37,99,235,0.6)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>Recall</span><span style="color:var(--accent3)">0.68</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:68%;height:100%;background:rgba(22,163,74,0.7)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px"><span>F1</span><span style="color:var(--accent3)">0.66</span></div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden"><div style="width:66%;height:100%;background:rgba(168,85,247,0.8)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:14px;background:rgba(22,163,74,0.06);border-left:2px solid var(--accent3);font-size:13px;color:#aaa">
+      Precision은 낮아지지만 <strong style="color:var(--white)">Recall이 3배 향상</strong>됩니다. "폭등 신발을 놓치는 것"이 더 큰 손해이므로 이 Trade-off는 비즈니스 맥락에서 합리적입니다.
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── STEP 5: FEATURE SELECTION ──────────────── -->
+<section class="section" id="step5">
+  <span class="section-num">05 — FEATURE SELECTION</span>
+  <h2 class="section-title fade-in">VIF로<br>다중공선성 제거</h2>
+  <p class="section-lead fade-in">
+    서로 비슷한 정보를 담고 있는 피처들을 동시에 넣으면 모델이 혼란스러워집니다. VIF로 이를 측정하고 정리합니다.
+  </p>
+
+  <div class="concept-grid fade-in">
+    <div class="concept-card">
+      <span class="concept-icon">📏</span>
+      <div class="concept-title">VIF란? (분산팽창지수)</div>
+      <div class="concept-body">
+        한 피처가 다른 피처들로 얼마나 설명되는지를 측정합니다. VIF = 1이면 완전 독립, VIF ≥ 10이면 다른 피처와 강하게 상관되어 있어 모델에서 중복 정보를 제공하는 것입니다.
+      </div>
+      <div class="concept-code">
+VIF &lt; 5   → 안전
+VIF 5~10  → 주의
+VIF ≥ 10  → 제거 ← 이 프로젝트 기준</div>
+    </div>
+    <div class="concept-card blue">
+      <span class="concept-icon">🎨</span>
+      <div class="concept-title">왜 color_* 피처는 VIF 적용 안 하나?</div>
+      <div class="concept-body">
+        원핫 인코딩(One-Hot Encoding)된 컬럼들은 구조적으로 VIF가 높게 나옵니다. color_white=1이면 나머지 색상은 자동으로 0이 되므로 "인공적인" 상관관계가 생깁니다. 이는 다중공선성이 아니라 인코딩의 특성이므로 통째로 포함합니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="viz-card fade-in">
+    <div class="viz-title">피처 선택 프로세스 흐름</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;align-items:center;gap:0">
+        <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);padding:20px 24px;flex:1;text-align:center">
+          <div style="font-family:monospace;font-size:11px;color:var(--mid);margin-bottom:6px">INPUT</div>
+          <div style="font-size:13px;font-weight:700">전체 피처</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">color + non-color 전체</div>
+        </div>
+        <div style="padding:0 16px;color:var(--mid);font-size:20px">→</div>
+        <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);padding:20px 24px;flex:1;text-align:center">
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:6px">STEP 1</div>
+          <div style="font-size:13px;font-weight:700">color / non-color 분리</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">color_* 제외하고 처리</div>
+        </div>
+        <div style="padding:0 16px;color:var(--mid);font-size:20px">→</div>
+        <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);padding:20px 24px;flex:1;text-align:center">
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:6px">STEP 2</div>
+          <div style="font-size:13px;font-weight:700">Importance 순 정렬</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">Gain 기준 내림차순</div>
+        </div>
+        <div style="padding:0 16px;color:var(--mid);font-size:20px">→</div>
+        <div style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.06);padding:20px 24px;flex:1;text-align:center">
+          <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:6px">STEP 3</div>
+          <div style="font-size:13px;font-weight:700">VIF 필터링</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">VIF ≥ 10 제거</div>
+        </div>
+        <div style="padding:0 16px;color:var(--mid);font-size:20px">→</div>
+        <div style="background:#1a2e1a;border:1px solid rgba(22,163,74,0.2);padding:20px 24px;flex:1;text-align:center">
+          <div style="font-family:monospace;font-size:11px;color:var(--accent3);margin-bottom:6px">OUTPUT</div>
+          <div style="font-size:13px;font-weight:700">최종 피처</div>
+          <div style="font-size:11px;color:#666;margin-top:4px">선택 non-color + 전체 color</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 평가지표 설명 -->
+  <div class="metrics-grid fade-in">
+    <div class="metric-card">
+      <div class="metric-num" style="color:var(--accent2)">ACC</div>
+      <div class="metric-name">Accuracy</div>
+      <div class="metric-desc">전체 예측 중 맞은 비율. 클래스 불균형 시 오해를 줄 수 있음</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" style="color:var(--accent)">F1</div>
+      <div class="metric-name">F1-Macro</div>
+      <div class="metric-desc">각 클래스의 F1 평균. <strong style="color:var(--white)">주 평가지표</strong>. 소수 클래스를 동등하게 취급</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" style="color:var(--accent3)">REC</div>
+      <div class="metric-name">Recall-Macro</div>
+      <div class="metric-desc">실제 Label 4를 얼마나 놓치지 않았는가. TH4 효과 측정에 핵심</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num" style="color:var(--gold)">PRE</div>
+      <div class="metric-name">Precision</div>
+      <div class="metric-desc">예측한 Label 4 중 실제로 Label 4였던 비율. TH4 올리면 하락</div>
+    </div>
+  </div>
+
+  <div class="insight-box fade-in">
+    <div class="insight-text">"왜 Accuracy가 아닌 F1-Macro를 쓰나?" — 클래스 불균형 상황에서 Accuracy는 다수 클래스만 맞춰도 높게 나옵니다. F1-Macro는 Label 0~4 각각의 F1을 동등하게 평균내므로, 희귀한 Label 4를 얼마나 잘 맞추는지도 점수에 반영됩니다.</div>
+    <div class="insight-source">— 평가지표 선택 근거</div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── RESULTS ──────────────── -->
+<section class="section" id="results">
+  <span class="section-num">06 — RESULTS</span>
+  <h2 class="section-title fade-in">4개 모델<br>성능 비교</h2>
+  <p class="section-lead fade-in">
+    Model1 / Model1+TH4 / Model2 / Model2+TH4 — 4가지 변형을 나란히 비교해 최적 조합을 선택합니다.
+  </p>
+
+  <div class="viz-card fade-in">
+    <div class="viz-title">4-Model 성능 비교표 (개념적 예시)</div>
+    <table class="strat-table">
+      <thead>
+        <tr>
+          <th>모델</th>
+          <th>Accuracy</th>
+          <th>F1-Macro</th>
+          <th>F1-Weighted</th>
+          <th>Recall-Macro</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">Model 1</span></td>
+          <td>0.74</td>
+          <td>0.58</td>
+          <td>0.72</td>
+          <td>0.55</td>
+          <td style="color:#666">Baseline</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">Model 1 + TH4</span></td>
+          <td>0.71</td>
+          <td>0.63</td>
+          <td>0.70</td>
+          <td>0.67</td>
+          <td style="color:var(--accent3)">Recall ↑</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">Model 2</span></td>
+          <td>0.75</td>
+          <td>0.60</td>
+          <td>0.74</td>
+          <td>0.57</td>
+          <td style="color:#666">피처 정제</td>
+        </tr>
+        <tr style="background:rgba(230,57,70,0.05)">
+          <td><span class="badge badge-red">Model 2 + TH4</span></td>
+          <td>0.72</td>
+          <td style="color:var(--accent);font-weight:700">0.66 ★</td>
+          <td>0.71</td>
+          <td style="color:var(--accent3);font-weight:700">0.70 ★</td>
+          <td><span class="badge badge-green">최종 선택</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:12px;color:var(--mid);margin-top:8px">※ 개념적 예시 수치. 실제 결과는 학습된 모델 출력 기준</div>
+  </div>
+
+  <!-- Confusion Matrix 시각화 -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">Confusion Matrix 읽는 법</div>
+    <div class="cm-wrap">
+      <div>
+        <div style="font-family:monospace;font-size:10px;color:var(--mid);margin-bottom:12px">← PREDICTED →</div>
+        <div class="cm-grid">
+          <!-- Header row -->
+          <div class="cm-cell cm-header"></div>
+          <div class="cm-cell cm-header">P:0</div>
+          <div class="cm-cell cm-header">P:1</div>
+          <div class="cm-cell cm-header">P:2</div>
+          <div class="cm-cell cm-header">P:3</div>
+          <!-- Row 0 -->
+          <div class="cm-cell cm-header">T:0</div>
+          <div class="cm-cell cm-diag tooltip-wrap">142<span class="tooltip-text">정확히 예측: Label 0 → 0</span></div>
+          <div class="cm-cell cm-med">18</div>
+          <div class="cm-cell cm-low">4</div>
+          <div class="cm-cell cm-low">2</div>
+          <!-- Row 1 -->
+          <div class="cm-cell cm-header">T:1</div>
+          <div class="cm-cell cm-med">22</div>
+          <div class="cm-cell cm-diag tooltip-wrap">189<span class="tooltip-text">정확히 예측: Label 1 → 1</span></div>
+          <div class="cm-cell cm-med">15</div>
+          <div class="cm-cell cm-low">3</div>
+          <!-- Row 2 -->
+          <div class="cm-cell cm-header">T:2</div>
+          <div class="cm-cell cm-low">5</div>
+          <div class="cm-cell cm-med">12</div>
+          <div class="cm-cell cm-diag tooltip-wrap">98<span class="tooltip-text">정확히 예측: Label 2 → 2</span></div>
+          <div class="cm-cell cm-med">14</div>
+          <!-- Row 3 -->
+          <div class="cm-cell cm-header">T:3</div>
+          <div class="cm-cell cm-low">2</div>
+          <div class="cm-cell cm-low">6</div>
+          <div class="cm-cell cm-high">24</div>
+          <div class="cm-cell cm-diag tooltip-wrap">45<span class="tooltip-text">정확히 예측: Label 3 → 3</span></div>
+        </div>
+        <div style="font-family:monospace;font-size:10px;color:var(--mid);margin-top:8px;text-align:center">대각선 = 정확한 예측 / 나머지 = 오분류</div>
+      </div>
+      <div class="cm-legend">
+        <div style="font-size:13px;color:#aaa;margin-bottom:20px;line-height:1.8">Confusion Matrix는 모델이 어떤 클래스를 어디로 오분류하는지 한눈에 보여줍니다.</div>
+        <div class="cm-legend-item">
+          <div class="cm-dot" style="background:rgba(37,99,235,0.6)"></div>
+          <span>대각선 (높을수록 좋음): 정확한 예측</span>
+        </div>
+        <div class="cm-legend-item">
+          <div class="cm-dot" style="background:rgba(230,57,70,0.4)"></div>
+          <span>빨간색: 많이 틀린 오분류 패턴</span>
+        </div>
+        <div class="cm-legend-item">
+          <div class="cm-dot" style="background:rgba(255,255,255,0.04)"></div>
+          <span>어두운 셀: 거의 없는 오분류</span>
+        </div>
+        <div style="margin-top:20px;padding:14px;background:rgba(212,160,23,0.06);border-left:2px solid var(--gold)">
+          <div style="font-size:12px;color:var(--gold);font-family:monospace;margin-bottom:6px">발표 팁</div>
+          <div style="font-size:12px;color:#aaa;line-height:1.65">Label 3 → Label 2로의 오분류가 많다면 "인접 등급간 구분이 어렵다"고 설명할 수 있습니다</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ──────────────── PRESENTATION POINTS ──────────────── -->
+<section class="section" id="points">
+  <span class="section-num">07 — PRESENTATION GUIDE</span>
+  <h2 class="section-title fade-in">발표 핵심 포인트<br>& 예상 질문</h2>
+  <p class="section-lead fade-in">
+    교수님이 주목할 가능성이 높은 포인트와 예상 질문 답변입니다. 발표 자료 슬라이드 구성에도 참고하세요.
+  </p>
+
+  <div class="points-grid fade-in">
+    <div class="point-card" data-num="01">
+      <div class="point-cat">핵심 설계 결정</div>
+      <div class="point-title">왜 KMeans + XGBoost 조합인가?</div>
+      <div class="point-body">명시적 라벨이 없는 문제를 비지도→지도 2단계로 해결한 것이 이 프로젝트의 핵심 아이디어입니다.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. 처음부터 회귀로 하면 안 됐나요?</div>
+        <div class="point-qa-a">A. 가능하지만 "어느 정도 오차가 의미 있는가"의 기준이 없습니다. 5구간 분류로 만들면 사용자에게 명확한 등급 정보를 줄 수 있습니다.</div>
+      </div>
+    </div>
+    <div class="point-card" data-num="02">
+      <div class="point-cat">데이터 무결성</div>
+      <div class="point-title">데이터 누수를 어떻게 막았나?</div>
+      <div class="point-body">GroupShuffleSplit + KMeans train-only fit + TH4 val-only 튜닝. 3중 누수 방지 구조입니다.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. 일반 train_test_split과 뭐가 다른가요?</div>
+        <div class="point-qa-a">A. 같은 제품의 거래가 train/test에 걸치면 모델이 "해당 제품의 패턴"을 외웁니다. 제품 단위 분리로 진짜 일반화 성능을 측정합니다.</div>
+      </div>
+    </div>
+    <div class="point-card" data-num="03">
+      <div class="point-cat">소수 클래스 전략</div>
+      <div class="point-title">Label 4 대응: 2가지 방어선</div>
+      <div class="point-body">1차: sample_weight로 학습 시 Label 4에 높은 가중치. 2차: TH4 후처리로 예측 단계에서 추가 보완.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. Precision이 낮아지는 건 문제 아닌가요?</div>
+        <div class="point-qa-a">A. 비즈니스 맥락에서 "폭등 신발을 놓치는 것(FN)"이 "잘못 예측하는 것(FP)"보다 손해가 큽니다. 의도적인 Trade-off입니다.</div>
+      </div>
+    </div>
+    <div class="point-card" data-num="04">
+      <div class="point-cat">모델 해석성</div>
+      <div class="point-title">Feature Importance로 설명 가능성 확보</div>
+      <div class="point-body">recent_avg_premium, days_since_release가 상위. 과거 프리미엄 이력과 출시 후 경과일이 가장 중요한 신호입니다.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. VIF 기준 10은 왜인가요?</div>
+        <div class="point-qa-a">A. 통계학의 일반적 기준입니다(Kutner et al., 2004). VIF=10은 해당 피처의 분산 중 90%가 다른 피처로 설명된다는 의미입니다.</div>
+      </div>
+    </div>
+    <div class="point-card" data-num="05">
+      <div class="point-cat">평가 전략</div>
+      <div class="point-title">왜 F1-Macro를 주 지표로 쓰나?</div>
+      <div class="point-body">클래스 불균형 시 Accuracy는 다수 클래스만 잘 맞춰도 높게 나옵니다. F1-Macro는 모든 클래스를 동등하게 평가합니다.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. F1-Weighted와 다른가요?</div>
+        <div class="point-qa-a">A. Weighted는 샘플 수 비례 평균, Macro는 단순 평균입니다. Label 4처럼 적은 클래스를 동등하게 보려면 Macro가 더 적합합니다.</div>
+      </div>
+    </div>
+    <div class="point-card" data-num="06">
+      <div class="point-cat">개선 여지</div>
+      <div class="point-title">다음 단계라면 이렇게</div>
+      <div class="point-body">Optuna로 XGBoost 하이퍼파라미터 최적화 / SMOTE로 오버샘플링 / 시계열 특성을 살린 Walk-Forward CV 적용.</div>
+      <div class="point-qa">
+        <div class="point-qa-q">Q. 하이퍼파라미터를 왜 그냥 고정했나요?</div>
+        <div class="point-qa-a">A. 이번은 파이프라인 검증이 목적입니다. n_estimators=500, lr=0.05, max_depth=6은 XGBoost 안정적 기본 조합이며, 최적화는 다음 단계 과제입니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 슬라이드 구성 가이드 -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">발표 슬라이드 추천 구성</div>
+    <table class="strat-table">
+      <thead>
+        <tr>
+          <th>슬라이드</th>
+          <th>제목</th>
+          <th>핵심 내용</th>
+          <th>시각화</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">S1</span></td>
+          <td>문제 정의</td>
+          <td>라벨이 없는 프리미엄 등급 → 왜 만들어야 하나</td>
+          <td>premium_ratio 분포 히스토그램</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">S2</span></td>
+          <td>전체 파이프라인</td>
+          <td>5단계 흐름도</td>
+          <td>파이프라인 다이어그램</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">S3</span></td>
+          <td>K 선택 과정</td>
+          <td>Elbow + Silhouette, K=5 선택 이유</td>
+          <td>이중 축 그래프</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">S4</span></td>
+          <td>누수 방지 설계</td>
+          <td>GroupShuffleSplit의 의미</td>
+          <td>일반 split vs group split 비교</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-gold">S5</span></td>
+          <td>모델 학습</td>
+          <td>클래스 불균형 대응 (sample_weight)</td>
+          <td>클래스별 가중치 막대 그래프</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-gold">S6</span></td>
+          <td>TH4 전략</td>
+          <td>후처리 아이디어 & Recall Trade-off</td>
+          <td>적용 전후 비교 막대</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">S7</span></td>
+          <td>피처 선택</td>
+          <td>VIF + Importance 프로세스</td>
+          <td>Feature Importance 수평 막대</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">S8</span></td>
+          <td>결과 비교</td>
+          <td>4개 모델 성능표 + Confusion Matrix</td>
+          <td>성능표 + 히트맵 4개</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">S9</span></td>
+          <td>결론 & 개선 방향</td>
+          <td>최종 선택 모델, 한계, 다음 단계</td>
+          <td>요약 카드</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 용어 사전 -->
+  <div class="viz-card fade-in">
+    <div class="viz-title">팀원을 위한 용어 사전</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:4px">premium_ratio</div>
+          <div style="font-size:13px;color:#aaa">(거래가 - 정가) / 정가. 0.5면 정가보다 50% 비싸게 팔린 것</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:4px">Inertia (관성)</div>
+          <div style="font-size:13px;color:#aaa">클러스터 내부 점들이 중심에서 얼마나 퍼져 있는지. 낮을수록 촘촘한 클러스터</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:4px">Silhouette Score</div>
+          <div style="font-size:13px;color:#aaa">클러스터가 얼마나 잘 분리됐는지. -1~1, 1에 가까울수록 좋음</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent);margin-bottom:4px">Data Leakage</div>
+          <div style="font-size:13px;color:#aaa">테스트 정보가 학습에 흘러들어가 성능이 부풀려지는 현상</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:4px">VIF (분산팽창지수)</div>
+          <div style="font-size:13px;color:#aaa">피처 간 선형 중복 정도. ≥10이면 다중공선성 심각, 제거 권고</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:4px">F1-Macro</div>
+          <div style="font-size:13px;color:#aaa">각 클래스의 F1 점수를 단순 평균. 소수 클래스도 동등하게 반영</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:4px">Feature Importance (Gain)</div>
+          <div style="font-size:13px;color:#aaa">각 피처가 트리 분기에서 얼마나 성능 향상에 기여했는지</div>
+        </div>
+        <div>
+          <div style="font-family:monospace;font-size:11px;color:var(--accent2);margin-bottom:4px">TH4 후처리</div>
+          <div style="font-size:13px;color:#aaa">예측 단계에서 Label 4 확률이 임계값 이상이면 강제 4 예측. Recall 향상 목적</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left">KREAM MODELING GUIDE</div>
+  <div class="footer-right">
+    토이 프로젝트 팀원 공유용<br>
+    KMeans → XGBoost → TH4 → VIF<br>
+    <span style="color:rgba(255,255,255,0.2)">Generated for presentation prep</span>
+  </div>
+</footer>
+
+<script>
+  // ── Intersection Observer for fade-in ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Animate bars when visible
+        entry.target.querySelectorAll('.cluster-bar-fill[data-width]').forEach(bar => {
+          setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 100);
+        });
+        entry.target.querySelectorAll('.fi-bar-fill[data-width]').forEach(bar => {
+          setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 200);
+        });
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // ── Trigger bars in already-visible sections on load ──
+  setTimeout(() => {
+    document.querySelectorAll('.cluster-bar-fill[data-width]').forEach(bar => {
+      if (bar.closest('.visible')) bar.style.width = bar.dataset.width + '%';
+    });
+    document.querySelectorAll('.fi-bar-fill[data-width]').forEach(bar => {
+      if (bar.closest('.visible')) bar.style.width = bar.dataset.width + '%';
+    });
+  }, 500);
+
+  // ── Active sidenav on scroll ──
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sidenav a');
+
+  const scrollObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.4 });
+
+  sections.forEach(s => scrollObs.observe(s));
+</script>
+</body>
+</html>
